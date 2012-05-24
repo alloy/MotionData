@@ -1,3 +1,5 @@
+# A naive example of a migratable RubyMotion/CoreData wrapper
+
 The following models define a schema that is immediatly available during development:
 
 ```ruby
