@@ -21,6 +21,20 @@ class Base < NSManagedObject
 
     def property(name, type, options = {})
       puts "#{self.name}##{name} has type `#{type.name}' (#{options.inspect})"
+
+      ad = NSAttributeDescription.new
+      ad.name          = name
+      ad.optional      = !options[:required]
+      ad.attributeType = case type
+                         when String  then NSStringAttributeType
+                         when Boolean then NSBooleanAttributeType
+                         # etc
+                         else
+                           # Transient types?
+                           NSUndefinedAttributeType
+                         end
+
+      entity_description.properties = entity_description.properties.arrayByAddingObject(ad)
     end
 
   end
