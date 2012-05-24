@@ -1,5 +1,5 @@
 class Article < Base
-  belongs_to :author, :class => Author
+  belongs_to :author, :class => 'Author'
 
   property :title,     String,  :required => true
   property :body,      String,  :required => true
