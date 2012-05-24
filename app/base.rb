@@ -1,5 +1,15 @@
-class Base < NSManagedObjectModel
+class Base < NSManagedObject
   class << self
+
+    def inherited(klass)
+      Schema.instance.register_entity(klass.entity_description)
+    end
+
+    def entity_description
+      @entity_description ||= NSEntityDescription.new.tap do |ed|
+        ed.name = ed.managedObjectClassName = self.name
+      end
+    end
 
     def belongs_to(name, options = {})
       puts "#{self.name} belongs to `#{name}' (#{options.inspect})"
