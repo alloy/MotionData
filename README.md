@@ -1,4 +1,4 @@
-The following models define the schema that is immediatly available during development:
+The following models define a schema that is immediatly available during development:
 
 ```ruby
 class Author < Base
@@ -16,7 +16,7 @@ class Article < Base
 end
 ```
 
-_NOTE the association macros don't actually do anything yet._
+_NOTE: the association macros don't actually do anything yet._
 
 The `Schema` instance can dump this definition, which looks like:
 
