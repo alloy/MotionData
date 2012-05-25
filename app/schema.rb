@@ -1,7 +1,7 @@
 module MotionData
 
   class EntityDescription < NSEntityDescription
-    def add_property(name, type, options)
+    def add_property(name, type, options={})
       ad = AttributeDescription.with_reflection(:name => name, :type => type, :options => options)
       self.properties = properties.arrayByAddingObject(ad)
     end

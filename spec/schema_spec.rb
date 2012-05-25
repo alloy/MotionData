@@ -23,6 +23,9 @@ module MotionData
 
     describe "when defining" do
 
+      before do
+      end
+
       describe "#add_entity" do
         it "yields an entity description to the block" do
           Schema.define_version('test') do |s|
@@ -42,6 +45,31 @@ module MotionData
 
           schema.entities.first.name.should == 'AnEntity'
         end
+      end
+
+      describe "#add_property" do
+        it "creates attributes with the given name and type" do
+          schema = Schema.define_version('test') do |s|
+            s.add_entity do |e|
+              e.name = 'AnEntity' # Needed so Core Data doesn't gripe
+              e.add_property :someProp, String
+            end
+          end
+
+          @coordinator = NSPersistentStoreCoordinator.alloc.initWithManagedObjectModel(schema)
+          @coordinator.addPersistentStoreWithType(NSInMemoryStoreType,
+                                                  configuration: nil,
+                                                  URL: nil,
+                                                  options: nil,
+                                                  error: nil)
+          @context = NSManagedObjectContext.alloc.init
+          @context.persistentStoreCoordinator = @coordinator
+          object = EntityDescription.insertNewObjectForEntityForName('AnEntity', inManagedObjectContext: @context)
+          object.someProp = 'hey'
+          object.someProp.should == 'hey'
+        end
+
+        #it "can create non optional types"
       end
 
     end
