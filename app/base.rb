@@ -57,16 +57,14 @@ module MotionData
       ad.attribute_reflection = reflection
       ad.name                 = reflection[:name]
       ad.optional             = !reflection[:options][:required]
-      ad.attributeType        = case reflection[:type]
-                                when String
-                                  NSStringAttributeType
-                                when CoreTypes::Boolean
-                                  NSBooleanAttributeType
-                                # etc
-                                else
-                                  # Transient types?
-                                  NSUndefinedAttributeType
-                                end
+
+      type = reflection[:type]
+      ad.attributeType = if type == String then NSStringAttributeType
+                         elsif type == CoreTypes::Boolean then NSBooleanAttributeType
+                         else
+                           # Transient types?
+                           NSUndefinedAttributeType
+                         end
       ad
     end
   end
