@@ -16,7 +16,7 @@ module MotionData
       end
 
       def inherited(klass)
-        Schema.current.register_entity(klass.entity_description)
+        MotionData::Schema.current.register_entity(klass.entity_description)
       end
 
       def entity_description

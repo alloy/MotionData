@@ -25,7 +25,7 @@ class AppDelegate
     # end
     # Dumping it again should look exactly the same.
     puts
-    puts Schema.current.to_ruby
+    puts MotionData::Schema.current.to_ruby
     puts
 
     true
