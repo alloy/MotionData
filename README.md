@@ -1,5 +1,8 @@
 # A naive example of a migratable RubyMotion/CoreData wrapper
 
+This uses a DSL which is inspired by [DataMapper](http://datamapper.org), but
+also [ActiveRecord](http://api.rubyonrails.org/classes/ActiveRecord/Base.html).
+
 The following models define a schema that is immediatly available during development:
 
 ```ruby
