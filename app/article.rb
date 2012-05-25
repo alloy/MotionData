@@ -1,4 +1,4 @@
-class Article < Base
+class Article < MotionData::Base
   belongs_to :author, :class => 'Author'
 
   property :title,     String,  :required => true
