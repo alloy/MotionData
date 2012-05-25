@@ -41,13 +41,6 @@ module MotionData
   end
 
 
-  class EntityDescription < NSEntityDescription
-    def add_property(name, type, options)
-      ad = AttributeDescription.with_reflection(:name => name, :type => type, :options => options)
-      self.properties = properties.arrayByAddingObject(ad)
-    end
-  end
-
   class AttributeDescription < NSAttributeDescription
     # This is stored mainly so it can easily be dumped by Schema#to_ruby.
     attr_accessor :attribute_reflection

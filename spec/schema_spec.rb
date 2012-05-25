@@ -28,7 +28,7 @@ module MotionData
           Schema.define_version('test') do |s|
             s.add_entity do |e|
               e.name = 'AnEntity' # Needed so Core Data doesn't gripe
-              e.class.should == NSEntityDescription
+              e.class.should == EntityDescription
             end
           end
         end

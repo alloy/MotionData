@@ -1,5 +1,13 @@
 module MotionData
 
+  class EntityDescription < NSEntityDescription
+    def add_property(name, type, options)
+      ad = AttributeDescription.with_reflection(:name => name, :type => type, :options => options)
+      self.properties = properties.arrayByAddingObject(ad)
+    end
+  end
+
+
   class Schema < NSManagedObjectModel
     def self.current
       @current ||= new.tap { |s| s.versionIdentifiers = NSSet.setWithObject('current') }
@@ -18,7 +26,7 @@ module MotionData
 
     # This is used in a dump by Schema#to_ruby.
     def add_entity
-      e = NSEntityDescription.new
+      e = EntityDescription.new
       yield e if block_given?
       register_entity(e)
     end
