@@ -10,7 +10,7 @@ module MotionData
 
   class Schema < NSManagedObjectModel
     def self.current
-      @current ||= new.tap { |s| s.versionIdentifiers = NSSet.setWithObject('current') }
+      @current ||= define_version('current')
     end
 
     def self.define_version(version)
