@@ -6,7 +6,7 @@ class Schema < NSManagedObjectModel
   def self.define_version(version)
     schema = new
     schema.versionIdentifiers = NSSet.setWithObject(version)
-    yield schema
+    yield schema if block_given?
     schema
   end
 

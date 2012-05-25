@@ -12,4 +12,11 @@ describe Schema do
     end
   end
 
+  describe ".define_version" do
+    it "returns a new schema with the given version identifier" do
+      schema = Schema.define_version('this version')
+      schema.versionIdentifiers.allObjects.should == ['this version']
+    end
+  end
+
 end
