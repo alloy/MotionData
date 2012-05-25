@@ -7,3 +7,9 @@ Motion::Project::App.setup do |app|
   app.files = %w{ app/schema.rb app/base.rb app/article.rb app/author.rb app/app_delegate.rb }
   app.frameworks += %w{ CoreData }
 end
+
+task 'spec' do
+  # This addition to the 'spec' task will close the simulator after tests run
+  # if there are no errors
+  sh "osascript -e 'tell application \"iphone simulator\" to quit'"
+end
