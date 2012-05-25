@@ -10,6 +10,11 @@ module MotionData
 
     class << self
 
+      def newInManagedObjectContext context
+        alloc.initWithEntity(entity_description,
+                             insertIntoManagedObjectContext: context)
+      end
+
       def inherited(klass)
         Schema.current.register_entity(klass.entity_description)
       end
@@ -53,8 +58,10 @@ module MotionData
       ad.name                 = reflection[:name]
       ad.optional             = !reflection[:options][:required]
       ad.attributeType        = case reflection[:type]
-                                when String  then NSStringAttributeType
-                                when CoreTypes::Boolean then NSBooleanAttributeType
+                                when String
+                                  NSStringAttributeType
+                                when CoreTypes::Boolean
+                                  NSBooleanAttributeType
                                 # etc
                                 else
                                   # Transient types?
