@@ -48,6 +48,10 @@ module MotionData
       end
 
       describe "#addProperty" do
+        after do
+          MagicalRecord.cleanUp
+        end
+
         it "creates attributes with the given name and type" do
           schema = Schema.defineVersion('test') do |s|
             s.addEntity do |e|
@@ -56,15 +60,12 @@ module MotionData
             end
           end
 
-          @coordinator = NSPersistentStoreCoordinator.alloc.initWithManagedObjectModel(schema)
-          @coordinator.addPersistentStoreWithType(NSInMemoryStoreType,
-                                                  configuration: nil,
-                                                  URL: nil,
-                                                  options: nil,
-                                                  error: nil)
-          @context = NSManagedObjectContext.alloc.init
-          @context.persistentStoreCoordinator = @coordinator
-          object = EntityDescription.insertNewObjectForEntityForName('AnEntity', inManagedObjectContext: @context)
+          # TODO make MR 'shorthand' available (bridgesupport issue). E.g.:
+          # NSManagedObjectModel.defaultManagedObjectModel = schema
+          NSManagedObjectModel.MR_setDefaultManagedObjectModel(schema)
+          MagicalRecord.setupCoreDataStackWithInMemoryStore
+
+          object = EntityDescription.insertNewObjectForEntityForName('AnEntity', inManagedObjectContext:NSManagedObjectContext.defaultContext)
           object.someProp = 'hey'
           object.someProp.should == 'hey'
         end

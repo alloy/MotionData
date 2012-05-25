@@ -10,9 +10,15 @@ module MotionData
 
     class << self
 
-      def newInManagedObjectContext context
-        alloc.initWithEntity(entityDescription,
-                             insertIntoManagedObjectContext: context)
+      # TODO why doesn't this work?
+      #alias_method :new, :createEntity
+
+      def new
+        createEntity
+      end
+
+      def newInContext(context)
+        createInContext(context)
       end
 
       def inherited(klass)
@@ -34,7 +40,6 @@ module MotionData
       end
 
       def property(name, type, options = {})
-        #puts "#{self.name}##{name} has type `#{type.name}' (#{options.inspect})"
         entityDescription.addProperty(name, type, options)
       end
     end
