@@ -5,7 +5,7 @@ describe "Model specs" do
     @context = NSManagedObjectContext.alloc.initWithConcurrencyType(NSMainQueueConcurrencyType)
   end
 
-  it "can create an Author" do
+  it "sanity check to create an Author with a string property" do
     author = Author.newInManagedObjectContext(@context)
     author.name = 'test'
     author.name.should == 'test'
