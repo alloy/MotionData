@@ -59,13 +59,10 @@ module MotionData
               e.addProperty :someProp, String
             end
           end
+          schema.setupCoreDataStackWithInMemoryStore
 
-          # TODO make MR 'shorthand' available (bridgesupport issue). E.g.:
-          # NSManagedObjectModel.defaultManagedObjectModel = schema
-          NSManagedObjectModel.MR_setDefaultManagedObjectModel(schema)
-          MagicalRecord.setupCoreDataStackWithInMemoryStore
-
-          object = EntityDescription.insertNewObjectForEntityForName('AnEntity', inManagedObjectContext:NSManagedObjectContext.defaultContext)
+          object = EntityDescription.insertNewObjectForEntityForName('AnEntity',
+                                              inManagedObjectContext:NSManagedObjectContext.defaultContext)
           object.someProp = 'hey'
           object.someProp.should == 'hey'
         end

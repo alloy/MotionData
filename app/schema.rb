@@ -41,6 +41,15 @@ module MotionData
       schema
     end
 
+    # Stack maintenance
+
+    def setupCoreDataStackWithInMemoryStore
+      NSManagedObjectModel.MR_setDefaultManagedObjectModel(self)
+      MagicalRecord.setupCoreDataStackWithInMemoryStore
+    end
+
+    # Schema definition
+
     def registerEntity(entity_description)
       self.entities = entities.arrayByAddingObject(entity_description)
     end
@@ -76,6 +85,7 @@ end
       reflection = property.attributeReflection
       %{    e.addProperty #{reflection[:name].inspect}, #{reflection[:type]}, #{reflection[:options].inspect}}
     end
+
   end
 
 end

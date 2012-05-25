@@ -2,8 +2,7 @@
 describe "Model specs" do
 
   before do
-    NSManagedObjectModel.MR_setDefaultManagedObjectModel(MotionData::Schema.current)
-    MagicalRecord.setupCoreDataStackWithInMemoryStore
+    MotionData::Schema.current.setupCoreDataStackWithInMemoryStore
   end
 
   after do
