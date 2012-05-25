@@ -33,7 +33,7 @@ class Base < NSManagedObject
   class << self
 
     def inherited(klass)
-      Schema.instance.register_entity(klass.entity_description)
+      Schema.current.register_entity(klass.entity_description)
     end
 
     def entity_description

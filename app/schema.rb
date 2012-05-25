@@ -1,6 +1,13 @@
 class Schema < NSManagedObjectModel
-  def self.instance
-    @instance ||= new
+  def self.current
+    @current ||= new.tap { |s| s.versionIdentifiers = NSSet.setWithObject('current') }
+  end
+
+  def self.define_version(version)
+    schema = new
+    schema.versionIdentifiers = NSSet.setWithObject(version)
+    yield schema
+    schema
   end
 
   def register_entity(entity_description)
