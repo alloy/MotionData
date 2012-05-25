@@ -32,23 +32,23 @@ module MotionData
     end
 
     def to_ruby
-  %{
-  Schema.define_version('#{NSBundle.mainBundle.infoDictionary['CFBundleVersion']}') do |s|
-  #{entities.map { |e| entity_to_ruby(e) }.join}
-  end
-  }
+%{
+Schema.define_version('#{NSBundle.mainBundle.infoDictionary['CFBundleVersion']}') do |s|
+#{entities.map { |e| entity_to_ruby(e) }.join}
+end
+}
     end
 
     private
 
     def entity_to_ruby(entity)
-  %{
-    s.add_entity do |e|
-      e.name = '#{entity.name}'
-      e.managedObjectClassName = '#{entity.managedObjectClassName}'
-  #{entity.properties.map { |p| property_to_ruby(p) }.join("\n")}
-    end
-  }
+%{
+  s.add_entity do |e|
+    e.name = '#{entity.name}'
+    e.managedObjectClassName = '#{entity.managedObjectClassName}'
+#{entity.properties.map { |p| property_to_ruby(p) }.join("\n")}
+  end
+}
     end
 
     def property_to_ruby(property)
