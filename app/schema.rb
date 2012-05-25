@@ -17,7 +17,7 @@ class Schema < NSManagedObjectModel
   # This is used in a dump by Schema#to_ruby.
   def add_entity
     e = NSEntityDescription.new
-    yield e
+    yield e if block_given?
     register_entity(e)
   end
 
