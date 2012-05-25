@@ -7,13 +7,13 @@ The following models define a schema that is immediatly available during develop
 
 ```ruby
 class Author < Base
-  has_many :articles, :class => 'Article'
+  hasMany :articles, :class => 'Article'
 
   property :name, String, :required => true
 end
 
 class Article < Base
-  belongs_to :author, :class => 'Author'
+  belongsTo :author, :class => 'Author'
 
   property :title,     String,  :required => true
   property :body,      String,  :required => true
@@ -26,20 +26,20 @@ _NOTE: the association macros don't actually do anything yet._
 The `Schema` instance can dump this definition, which looks like:
 
 ```ruby
-Schema.define_version('1.0') do |s|
+Schema.defineVersion('1.0') do |s|
 
-  s.add_entity do |e|
+  s.addEntity do |e|
     e.name = 'Article'
     e.managedObjectClassName = 'Article'
-    e.add_property :published, Boolean, {:default=>false}
-    e.add_property :title, String, {:required=>true}
-    e.add_property :body, String, {:required=>true}
+    e.addProperty :published, Boolean, {:default=>false}
+    e.addProperty :title, String, {:required=>true}
+    e.addProperty :body, String, {:required=>true}
   end
 
-  s.add_entity do |e|
+  s.addEntity do |e|
     e.name = 'Author'
     e.managedObjectClassName = 'Author'
-    e.add_property :name, String, {:required=>true}
+    e.addProperty :name, String, {:required=>true}
   end
 
 end

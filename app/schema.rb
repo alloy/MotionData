@@ -1,59 +1,80 @@
 module MotionData
 
   class EntityDescription < NSEntityDescription
-    def add_property(name, type, options={})
-      ad = AttributeDescription.with_reflection(:name => name, :type => type, :options => options)
+    def addProperty(name, type, options={})
+      ad = AttributeDescription.withReflection(:name => name, :type => type, :options => options)
       self.properties = properties.arrayByAddingObject(ad)
+    end
+  end
+
+  class AttributeDescription < NSAttributeDescription
+    # This is stored mainly so it can easily be dumped by Schema#to_ruby.
+    attr_accessor :attributeReflection
+
+    def self.withReflection(reflection)
+      ad = new
+      ad.attributeReflection = reflection
+      ad.name                = reflection[:name]
+      ad.optional            = !reflection[:options][:required]
+
+      type = reflection[:type]
+      ad.attributeType = if type == String then NSStringAttributeType
+                         elsif type == CoreTypes::Boolean then NSBooleanAttributeType
+                         else
+                           # Transient types?
+                           NSUndefinedAttributeType
+                         end
+      ad
     end
   end
 
 
   class Schema < NSManagedObjectModel
     def self.current
-      @current ||= define_version('current')
+      @current ||= defineVersion('current')
     end
 
-    def self.define_version(version)
+    def self.defineVersion(version)
       schema = new
       schema.versionIdentifiers = NSSet.setWithObject(version)
       yield schema if block_given?
       schema
     end
 
-    def register_entity(entity_description)
+    def registerEntity(entity_description)
       self.entities = entities.arrayByAddingObject(entity_description)
     end
 
     # This is used in a dump by Schema#to_ruby.
-    def add_entity
+    def addEntity
       e = EntityDescription.new
       yield e if block_given?
-      register_entity(e)
+      registerEntity(e)
     end
 
-    def to_ruby
+    def toRuby
 %{
-Schema.define_version('#{NSBundle.mainBundle.infoDictionary['CFBundleVersion']}') do |s|
-#{entities.map { |e| entity_to_ruby(e) }.join}
+Schema.defineVersion('#{NSBundle.mainBundle.infoDictionary['CFBundleVersion']}') do |s|
+#{entities.map { |e| entityToRuby(e) }.join}
 end
 }
     end
 
     private
 
-    def entity_to_ruby(entity)
+    def entityToRuby(entity)
 %{
-  s.add_entity do |e|
+  s.addEntity do |e|
     e.name = '#{entity.name}'
     e.managedObjectClassName = '#{entity.managedObjectClassName}'
-#{entity.properties.map { |p| property_to_ruby(p) }.join("\n")}
+#{entity.properties.map { |p| propertyToRuby(p) }.join("\n")}
   end
 }
     end
 
-    def property_to_ruby(property)
-      reflection = property.attribute_reflection
-      %{    e.add_property #{reflection[:name].inspect}, #{reflection[:type]}, #{reflection[:options].inspect}}
+    def propertyToRuby(property)
+      reflection = property.attributeReflection
+      %{    e.addProperty #{reflection[:name].inspect}, #{reflection[:type]}, #{reflection[:options].inspect}}
     end
   end
 

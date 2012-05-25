@@ -14,9 +14,9 @@ module MotionData
       end
     end
 
-    describe ".define_version" do
+    describe ".defineVersion" do
       it "returns a new schema with the given version identifier" do
-        schema = Schema.define_version('this version')
+        schema = Schema.defineVersion('this version')
         schema.versionIdentifiers.allObjects.should == ['this version']
       end
     end
@@ -26,10 +26,10 @@ module MotionData
       before do
       end
 
-      describe "#add_entity" do
+      describe "#addEntity" do
         it "yields an entity description to the block" do
-          Schema.define_version('test') do |s|
-            s.add_entity do |e|
+          Schema.defineVersion('test') do |s|
+            s.addEntity do |e|
               e.name = 'AnEntity' # Needed so Core Data doesn't gripe
               e.class.should == EntityDescription
             end
@@ -37,8 +37,8 @@ module MotionData
         end
 
         it "registers the entity with the schema" do
-          schema = Schema.define_version('test') do |s|
-            s.add_entity do |e|
+          schema = Schema.defineVersion('test') do |s|
+            s.addEntity do |e|
               e.name = 'AnEntity' # Needed so Core Data doesn't gripe
             end
           end
@@ -47,12 +47,12 @@ module MotionData
         end
       end
 
-      describe "#add_property" do
+      describe "#addProperty" do
         it "creates attributes with the given name and type" do
-          schema = Schema.define_version('test') do |s|
-            s.add_entity do |e|
+          schema = Schema.defineVersion('test') do |s|
+            s.addEntity do |e|
               e.name = 'AnEntity' # Needed so Core Data doesn't gripe
-              e.add_property :someProp, String
+              e.addProperty :someProp, String
             end
           end
 
