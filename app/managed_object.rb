@@ -20,6 +20,10 @@ module MotionData
         entity
       end
 
+      #def saveInBackground(&block)
+        #MagicalRecord.saveInBackgroundWithBlock(block)
+      #end
+
       def inherited(klass)
         MotionData::Schema.current.registerEntity(klass.entityDescription)
       end
