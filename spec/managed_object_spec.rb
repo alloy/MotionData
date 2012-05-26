@@ -16,4 +16,19 @@ describe "MotionData::ManagedObject" do
     end
   end
 
+  describe "initialization" do
+    describe "concerning context" do
+      it "by default uses NSManagedObjectContext.defaultContext" do
+        Author.new.managedObjectContext.should == NSManagedObjectContext.defaultContext
+      end
+
+      it "optionally uses an explicit different context" do
+        context = NSManagedObjectContext.context
+        author = Author.newInContext(context)
+        author.managedObjectContext.should == context
+        author.managedObjectContext.should.not == NSManagedObjectContext.defaultContext
+      end
+    end
+  end
+
 end
