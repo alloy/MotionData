@@ -7,7 +7,7 @@ require 'motion-cocoapods'
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'MotionData'
-  app.files = %w{ app/schema.rb app/base.rb app/article.rb app/author.rb app/app_delegate.rb }
+  app.files = %w{ app/schema.rb app/managed_object.rb app/article.rb app/author.rb app/app_delegate.rb }
   app.frameworks += %w{ CoreData }
 
   app.pods do
