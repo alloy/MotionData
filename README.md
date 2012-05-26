@@ -6,13 +6,13 @@ also [ActiveRecord](http://api.rubyonrails.org/classes/ActiveRecord/Base.html).
 The following models define a schema that is immediatly available during development:
 
 ```ruby
-class Author < Base
+class Author < MotionData::ManagedObject
   hasMany :articles, :class => 'Article'
 
   property :name, String, :required => true
 end
 
-class Article < Base
+class Article < MotionData::ManagedObject
   belongsTo :author, :class => 'Author'
 
   property :title,     String,  :required => true
