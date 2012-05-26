@@ -29,6 +29,13 @@ describe "MotionData::ManagedObject" do
         author.managedObjectContext.should.not == NSManagedObjectContext.defaultContext
       end
     end
+
+    describe "concerning property values" do
+      it "assigns the given properties to the instance" do
+        Author.new(:name => "Edgar Allan Poe").name.should == "Edgar Allan Poe"
+        Author.newInContext(NSManagedObjectContext.context, :name => "Edgar Allan Poe").name.should == "Edgar Allan Poe"
+      end
+    end
   end
 
 end

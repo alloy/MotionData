@@ -13,12 +13,14 @@ module MotionData
       # TODO why doesn't this work?
       #alias_method :new, :createEntity
 
-      def new
-        createEntity
+      def new(properties = nil)
+        newInContext(NSManagedObjectContext.contextForCurrentThread, properties)
       end
 
-      def newInContext(context)
-        createInContext(context)
+      def newInContext(context, properties = nil)
+        entity = createInContext(context)
+        properties.each { |k, v| entity.send("#{k}=", v) } if properties
+        entity
       end
 
       def inherited(klass)
