@@ -26,10 +26,10 @@ module MotionData
       before do
       end
 
-      describe "#addEntity" do
+      describe "#entity" do
         it "yields an entity description to the block" do
           Schema.defineVersion('test') do |s|
-            s.addEntity do |e|
+            s.entity do |e|
               e.name = 'AnEntity' # Needed so Core Data doesn't gripe
               e.class.should == EntityDescription
             end
@@ -38,7 +38,7 @@ module MotionData
 
         it "registers the entity with the schema" do
           schema = Schema.defineVersion('test') do |s|
-            s.addEntity do |e|
+            s.entity do |e|
               e.name = 'AnEntity' # Needed so Core Data doesn't gripe
             end
           end
@@ -47,16 +47,16 @@ module MotionData
         end
       end
 
-      describe "#addProperty" do
+      describe "#property" do
         after do
           MagicalRecord.cleanUp
         end
 
         it "creates attributes with the given name and type" do
           schema = Schema.defineVersion('test') do |s|
-            s.addEntity do |e|
+            s.entity do |e|
               e.name = 'AnEntity' # Needed so Core Data doesn't gripe
-              e.addProperty :someProp, String
+              e.property :someProp, String
             end
           end
           schema.setupCoreDataStackWithInMemoryStore

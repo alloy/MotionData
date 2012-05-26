@@ -39,7 +39,7 @@ module MotionData
       end
 
       def property(name, type, options = {})
-        entityDescription.addProperty(name, type, options)
+        entityDescription.property(name, type, options)
       end
     end
   end

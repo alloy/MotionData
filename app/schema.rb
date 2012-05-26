@@ -1,7 +1,7 @@
 module MotionData
 
   class EntityDescription < NSEntityDescription
-    def addProperty(name, type, options={})
+    def property(name, type, options={})
       ad = AttributeDescription.withReflection(:name => name, :type => type, :options => options)
       self.properties = properties.arrayByAddingObject(ad)
     end
@@ -55,7 +55,7 @@ module MotionData
     end
 
     # This is used in a dump by Schema#to_ruby.
-    def addEntity
+    def entity
       e = EntityDescription.new
       yield e if block_given?
       registerEntity(e)
@@ -73,7 +73,7 @@ end
 
     def entityToRuby(entity)
 %{
-  s.addEntity do |e|
+  s.entity do |e|
     e.name = '#{entity.name}'
     e.managedObjectClassName = '#{entity.managedObjectClassName}'
 #{entity.properties.map { |p| propertyToRuby(p) }.join("\n")}
@@ -83,7 +83,7 @@ end
 
     def propertyToRuby(property)
       reflection = property.attributeReflection
-      %{    e.addProperty #{reflection[:name].inspect}, #{reflection[:type]}, #{reflection[:options].inspect}}
+      %{    e.property #{reflection[:name].inspect}, #{reflection[:type]}, #{reflection[:options].inspect}}
     end
 
   end
