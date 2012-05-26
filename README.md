@@ -2,6 +2,8 @@
 
 This uses a DSL which is inspired by [DataMapper](http://datamapper.org), but
 also [ActiveRecord](http://api.rubyonrails.org/classes/ActiveRecord/Base.html).
+In addition, it uses [MagicalRecord](https://github.com/magicalpanda/MagicalRecord)
+for many common tasks.
 
 The following models define a schema that is immediatly available during development:
 
