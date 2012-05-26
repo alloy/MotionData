@@ -5,7 +5,7 @@ module MotionData
     end
   end
 
-  class Base < NSManagedObject
+  class ManagedObject < NSManagedObject
     include CoreTypes
 
     class << self
