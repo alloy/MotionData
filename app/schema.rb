@@ -48,7 +48,36 @@ module MotionData
       MagicalRecord.setupCoreDataStackWithInMemoryStore
     end
 
+    # TODO handle errors!
+    def migrateFromSchema(source)
+      sourceModel, destinationModel = source.mappingModel, self.mappingModel
+      if mappingModel = NSMappingModel.inferredMappingModelForSourceModel(sourceModel, destinationModel:destinationModel, error:nil)
+        manager = NSMigrationManager.alloc.initWithSourceModel(sourceModel, destinationModel:destinationModel)
+        success = manager.migrateStoreFromURL(nil,
+                                         type:NSInMemoryStoreType,
+                                     options:nil,
+                            withMappingModel:mappingModel,
+                            toDestinationURL:nil,
+                             destinationType:NSInMemoryStoreType,
+                          destinationOptions:nil,
+                                       error:nil)
+        if success
+          # TODO an actual on-disk store should then be replaced on disk
+        else
+          raise 'Oh noes!'
+        end
+      else
+        raise 'Oh noes!'
+      end
+    end
+
     # Schema definition
+
+    # TODO the use should be able to specify the code for the actual migration here.
+    # See: https://github.com/mdiep/CoreDataInCode/blob/master/Source/Models/RBObjectModel_v003.m#L92
+    def mappingModel
+      nil
+    end
 
     def registerEntity(entity_description)
       self.entities = entities.arrayByAddingObject(entity_description)
