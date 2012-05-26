@@ -1,3 +1,4 @@
+* Rename Schema to Model to adhere to CD name?
 * The `class` of an association should be inflected from the name.
 * Is it better to follow the original CoreData names such as the `optional` property of NSAttributeDescription, instead of using `:required` as the option?
 * Currently Schema#to_ruby uses CFBundleVersion which should only change on each release. It might be better to use the build number so that migrations can be done more often.
