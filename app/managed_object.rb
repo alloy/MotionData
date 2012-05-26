@@ -10,9 +10,6 @@ module MotionData
 
     class << self
 
-      # TODO why doesn't this work?
-      #alias_method :new, :createEntity
-
       def new(properties = nil)
         newInContext(NSManagedObjectContext.contextForCurrentThread, properties)
       end
