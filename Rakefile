@@ -11,7 +11,9 @@ Motion::Project::App.setup do |app|
   app.frameworks += %w{ CoreData }
 
   app.pods do
-    dependency 'MagicalRecord', '~> 2.0.0'
+    dependency 'CocoaLumberjack' # Used by MagicalRecord (if available) to log
+    #dependency 'MagicalRecord', '~> 2.0.0'
+    dependency 'MagicalRecord', :git => 'https://github.com/magicalpanda/MagicalRecord.git'
   end
 end
 

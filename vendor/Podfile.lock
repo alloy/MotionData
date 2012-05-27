@@ -1,0 +1,7 @@
+PODS:
+  - CocoaLumberjack (1.3.3)
+  - MagicalRecord (2.0)
+
+DEPENDENCIES:
+  - CocoaLumberjack
+  - MagicalRecord (from `https://github.com/magicalpanda/MagicalRecord.git')
