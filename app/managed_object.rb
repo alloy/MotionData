@@ -11,7 +11,8 @@ module MotionData
     class << self
 
       def new(properties = nil)
-        newInContext(NSManagedObjectContext.contextForCurrentThread, properties)
+        context = Thread.current[:localContext] || NSManagedObjectContext.contextForCurrentThread
+        newInContext(context, properties)
       end
 
       def newInContext(context, properties = nil)
@@ -20,9 +21,13 @@ module MotionData
         entity
       end
 
-      #def saveInBackground(&block)
-        #MagicalRecord.saveInBackgroundWithBlock(block)
-      #end
+      def saveInBackground(&block)
+        MagicalRecord.saveInBackgroundWithBlock(lambda do |localContext|
+          Thread.current[:localContext] = localContext
+          block.call(localContext)
+          Thread.current[:localContext] = nil
+        end)
+      end
 
       def inherited(klass)
         MotionData::Schema.current.registerEntity(klass.entityDescription)
