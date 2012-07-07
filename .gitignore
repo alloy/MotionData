@@ -1,7 +1,6 @@
 .repl_history
 .*.sw?
 build
-vendor/Pods
 resources/*.nib
 resources/*.momd
 resources/*.storyboardc
