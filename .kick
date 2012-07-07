@@ -1,0 +1,11 @@
+process do |files|
+  specs = files.take_and_map do |file|
+    case file
+    when %r{app/(.+)\.rb$}
+      Dir.glob("spec/#{$1}_spec.rb")
+    when %r{spec/.+_spec\.rb$}
+      file
+    end
+  end
+  execute "rake spec files=#{specs.uniq.join(',')}" unless specs.empty?
+end

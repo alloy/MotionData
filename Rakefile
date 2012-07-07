@@ -22,3 +22,10 @@ task 'spec' do
   # if there are no errors
   sh "osascript -e 'tell application \"iphone simulator\" to quit'"
 end
+
+namespace :spec do
+  desc "Auto-run specs"
+  task :kick do
+    sh "bundle exec kicker -c"
+  end
+end
