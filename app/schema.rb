@@ -1,5 +1,11 @@
 module MotionData
 
+  class Context < NSManagedObjectContext
+    def self.default
+      self.MR_defaultContext
+    end
+  end
+
   class EntityDescription < NSEntityDescription
     def property(name, type, options={})
       ad = AttributeDescription.withReflection(:name => name, :type => type, :options => options)
@@ -45,7 +51,9 @@ module MotionData
 
     def setupCoreDataStackWithInMemoryStore
       NSManagedObjectModel.MR_setDefaultManagedObjectModel(self)
-      MagicalRecord.setupCoreDataStackWithInMemoryStore
+      coordinator = NSPersistentStoreCoordinator.MR_coordinatorWithInMemoryStore
+      NSPersistentStoreCoordinator.MR_setDefaultStoreCoordinator(coordinator)
+      Context.MR_initializeDefaultContextWithCoordinator(coordinator)
     end
 
     # TODO handle errors!

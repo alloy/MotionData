@@ -115,7 +115,7 @@ static NSManagedObjectContext *defaultManagedObjectContext_ = nil;
 
 + (NSManagedObjectContext *) MR_contextWithParent:(NSManagedObjectContext *)parentContext;
 {
-    NSManagedObjectContext *context = [self MR_contextWithoutParent];
+    NSManagedObjectContext *context = [[parentContext class] MR_contextWithoutParent];
     [context setParentContext:parentContext];
     return context;
 }
@@ -129,7 +129,7 @@ static NSManagedObjectContext *defaultManagedObjectContext_ = nil;
 + (NSManagedObjectContext *) MR_contextThatPushesChangesToDefaultContext;
 {
     NSManagedObjectContext *defaultContext = [self MR_defaultContext];
-    NSManagedObjectContext *childContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    NSManagedObjectContext *childContext = [[self alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
     [childContext setParentContext:defaultContext];
     return childContext;
 }

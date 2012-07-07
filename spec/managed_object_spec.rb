@@ -36,20 +36,7 @@ describe "MotionData::ManagedObject" do
     end
   end
 
-  # TODO currently these methods yield the default context, I'm pretty sure
-  # that's not supposed to be the case. Waiting to hear from Saul Mora.
-  #
   describe "concerning saving on a background thread" do
-    it "is performed in a seperate context" do
-      localContextIsChildOfDefaultContext = nil
-      MotionData::ManagedObject.saveInBackground do |localContext|
-        localContextIsChildOfDefaultContext = (localContext.parentContext == NSManagedObjectContext.defaultContext)
-      end
-      wait 0.1 do
-        localContextIsChildOfDefaultContext.should == true
-      end
-    end
-
     it "merges the changes into the default context afterwards" do
       MotionData::ManagedObject.saveInBackground do
         Author.new(:name => "Edgar Allan Poe")
