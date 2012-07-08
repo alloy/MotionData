@@ -30,27 +30,27 @@ module MotionData
       c.parentContext.should == Context.main
     end
 
-    it "returns the main context as the default context on the main thread" do
-      Context.default.should == Context.main
+    it "returns the main context as the current context on the main thread" do
+      Context.current.should == Context.main
     end
 
-    it "by default has no default context on other threads" do
-      on_thread { Context.default == nil }.should == true
+    it "by default has no current context on other threads" do
+      on_thread { Context.current == nil }.should == true
     end
 
-    it "can temporarily override the default context on only the current thread" do
+    it "can temporarily override the current context on only the current thread" do
       context = Context.context
 
-      Context.withDefault(context) do
+      Context.withCurrent(context) do
         # main thread
-        Context.default.should == context
+        Context.current.should == context
         # other thread
-        on_thread { Context.default == nil }.should == true
+        on_thread { Context.current == nil }.should == true
       end
 
       on_thread do
-        Context.withDefault(context) do
-          Context.default == context
+        Context.withCurrent(context) do
+          Context.current == context
         end
       end.should == true
     end
@@ -60,24 +60,24 @@ module MotionData
       exception = nil
       begin
         context = Context.context
-        Context.withDefault(context) do
+        Context.withCurrent(context) do
           raise "ohnoes!"
         end
       rescue Object => exception
       end
       exception.message.should == "ohnoes!"
-      Context.default.should == Context.main
+      Context.current.should == Context.main
     end
 
     describe "concerning performing work on the context" do
-      it "changes the default context for the duration of the block which is performed asynchronously" do
+      it "changes the current context for the duration of the block which is performed asynchronously" do
         context = Context.context
         thread  = Thread.current
         @result = false
 
         return_value = context.perform(:background => true) do |c|
           # first save the status, but don't save into @result yet
-          r = Thread.current != thread && Context.default == context && c == context
+          r = Thread.current != thread && Context.current == context && c == context
           sleep 0.1
           # after 0.1s save into @result
           @result = r
@@ -91,13 +91,13 @@ module MotionData
         end
       end
 
-      it "changes the default context for the duration of the block which is performed synchronously" do
+      it "changes the current context for the duration of the block which is performed synchronously" do
         context = Context.context
         thread  = Thread.current
         @result = false
 
         return_value = context.perform do |c|
-          r = Thread.current == thread && Context.default == context && c == context
+          r = Thread.current == thread && Context.current == context && c == context
           sleep 0.1
           @result = r
           :from_block
@@ -107,15 +107,12 @@ module MotionData
       end
     end
 
-    # TODO currently these methods yield the default context, I'm pretty sure
-    # that's not supposed to be the case. Waiting to hear from Saul Mora.
-    #
     describe "concerning transactional saving to the parent context" do
       it "yields a Context instance that is a child of the context" do
         @result = false
         Context.main.transaction do |localContext|
           @result = localContext.instance_of?(Context) &&
-                      Context.default == localContext &&
+                      Context.current == localContext &&
                         localContext.parentContext == Context.main
         end
         @result.should == true

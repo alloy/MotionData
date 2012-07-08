@@ -6,15 +6,15 @@ module MotionData
       # This returns the default context for the current thread. On the main
       # thread this will be `Context.main` and on other threads this will lazy
       # load (and cache) a context through `Context.context`
-      def default
-        Thread.current[:motionDataDefaultContext] || (main if NSThread.mainThread?)
+      def current
+        Thread.current[:motionDataCurrentContext] || (main if NSThread.mainThread?)
       end
 
-      def withDefault(context)
-        Thread.current[:motionDataDefaultContext] = context
+      def withCurrent(context)
+        Thread.current[:motionDataCurrentContext] = context
         yield
       ensure
-        Thread.current[:motionDataDefaultContext] = nil
+        Thread.current[:motionDataCurrentContext] = nil
       end
 
       # This is the root context for all contexts managed by MotionData, which
@@ -66,7 +66,7 @@ module MotionData
     end
 
     # Performs a block on the context's dispatch queue, while changing
-    # `Context.default` to the context for the duration of the block.
+    # `Context.current` to the context for the duration of the block.
     #
     # Options:
     #
@@ -78,7 +78,7 @@ module MotionData
     def perform(options = {}, &block)
       result = nil
       work   = lambda do
-        Context.withDefault(self) do
+        Context.withCurrent(self) do
           result = block.call(self)
         end
       end

@@ -62,7 +62,7 @@ module MotionData
           schema.setupCoreDataStackWithInMemoryStore
 
           object = EntityDescription.insertNewObjectForEntityForName('AnEntity',
-                                              inManagedObjectContext:Context.default)
+                                              inManagedObjectContext:Context.current)
           object.someProp = 'hey'
           object.someProp.should == 'hey'
         end

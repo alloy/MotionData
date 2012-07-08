@@ -11,8 +11,7 @@ module MotionData
     class << self
 
       def new(properties = nil)
-        #context = Thread.current[:localContext] || NSManagedObjectContext.contextForCurrentThread
-        newInContext(Context.default, properties)
+        newInContext(Context.current, properties)
       end
 
       def newInContext(context, properties = nil)
@@ -53,8 +52,8 @@ module MotionData
         # have been run.
         #
         # This is what MagicalRecord does too.
-        Context.default.performBlockAndWait(lambda do
-          results = Context.default.executeFetchRequest(scope, error:nil)
+        Context.current.performBlockAndWait(lambda do
+          results = Context.current.executeFetchRequest(scope, error:nil)
           # TODO handleError(error) unless results
         end)
         results

@@ -37,7 +37,7 @@ module MotionData
     end
 
     describe "finders" do
-      it "returns all entities of a managed object in the default context" do
+      it "returns all entities of a managed object in the current context" do
         Author.all.should == []
         Author.new(:name => "Edgar Allan Poe")
         Author.all.map(&:name).should == ["Edgar Allan Poe"]
