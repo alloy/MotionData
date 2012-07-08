@@ -1,9 +1,6 @@
 module MotionData
-
-  class Context < NSManagedObjectContext
-    def self.default
-      self.MR_defaultContext
-    end
+  def self.setupCoreDataStackWithInMemoryStore
+    Schema.current.setupCoreDataStackWithInMemoryStore
   end
 
   class EntityDescription < NSEntityDescription
@@ -34,7 +31,6 @@ module MotionData
     end
   end
 
-
   class Schema < NSManagedObjectModel
     def self.current
       @current ||= defineVersion('current')
@@ -50,10 +46,8 @@ module MotionData
     # Stack maintenance
 
     def setupCoreDataStackWithInMemoryStore
-      NSManagedObjectModel.MR_setDefaultManagedObjectModel(self)
-      coordinator = NSPersistentStoreCoordinator.MR_coordinatorWithInMemoryStore
-      NSPersistentStoreCoordinator.MR_setDefaultStoreCoordinator(coordinator)
-      Context.MR_initializeDefaultContextWithCoordinator(coordinator)
+      Context.root = Context.main = nil
+      StoreCoordinator.default = StoreCoordinator.inMemory(self)
     end
 
     # TODO handle errors!
