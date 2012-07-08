@@ -12,21 +12,13 @@ module MotionData
 
       def new(properties = nil)
         #context = Thread.current[:localContext] || NSManagedObjectContext.contextForCurrentThread
-        newInContext(Context.main, properties)
+        newInContext(Context.default, properties)
       end
 
       def newInContext(context, properties = nil)
         entity = alloc.initWithEntity(entityDescription, insertIntoManagedObjectContext:context)
         properties.each { |k, v| entity.send("#{k}=", v) } if properties
         entity
-      end
-
-      def saveInBackground(&block)
-        MagicalRecord.saveInBackgroundWithBlock(lambda do |localContext|
-          Thread.current[:localContext] = localContext
-          block.call(localContext)
-          Thread.current[:localContext] = nil
-        end)
       end
 
       def inherited(klass)
@@ -49,6 +41,23 @@ module MotionData
 
       def property(name, type, options = {})
         entityDescription.property(name, type, options)
+      end
+
+      # Finders
+
+      def all
+        scope = NSFetchRequest.new
+        scope.entity = entityDescription
+        results = nil
+        # Encueing the fetch like this ensures other transactions on the context
+        # have been run.
+        #
+        # This is what MagicalRecord does too.
+        Context.default.performBlockAndWait(lambda do
+          results = Context.default.executeFetchRequest(scope, error:nil)
+          # TODO handleError(error) unless results
+        end)
+        results
       end
     end
   end

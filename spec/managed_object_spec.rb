@@ -36,18 +36,13 @@ module MotionData
       end
     end
 
-    #describe "concerning saving on a background thread" do
-      #it "merges the changes into the default context afterwards" do
-        #MotionData::ManagedObject.saveInBackground do
-          #Author.new(:name => "Edgar Allan Poe")
-        #end
-        #Author.numberOfEntities.should == 0
-        #wait 0.1 do
-          #Author.findAll.map(&:name).should == ["Edgar Allan Poe"]
-        #end
-      #end
-    #end
-
+    describe "finders" do
+      it "returns all entities of a managed object in the default context" do
+        Author.all.should == []
+        Author.new(:name => "Edgar Allan Poe")
+        Author.all.map(&:name).should == ["Edgar Allan Poe"]
+      end
+    end
   end
 
 end
