@@ -1,9 +1,6 @@
 $:.unshift("/Library/RubyMotion/lib")
 require 'motion/project'
 
-require 'rubygems'
-require 'motion-cocoapods'
-
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'MotionData'
@@ -18,12 +15,6 @@ Motion::Project::App.setup do |app|
     app/app_delegate.rb
   }
   app.frameworks += %w{ CoreData }
-
-  app.pods do
-    dependency 'CocoaLumberjack' # Used by MagicalRecord (if available) to log
-    #dependency 'MagicalRecord', '~> 2.0.0'
-    dependency 'MagicalRecord', :git => 'https://github.com/magicalpanda/MagicalRecord.git'
-  end
 end
 
 task 'spec' do
