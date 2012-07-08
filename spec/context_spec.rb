@@ -30,6 +30,45 @@ module MotionData
       c.parentContext.should == Context.main
     end
 
+    it "returns the main context as the default context on the main thread" do
+      Context.default.should == Context.main
+    end
+
+    it "by default has no default context on other threads" do
+      on_thread { Context.default == nil }.should == true
+    end
+
+    it "can temporarily override the default context on only the current thread" do
+      context = Context.context
+
+      Context.withDefault(context) do
+        # main thread
+        Context.default.should == context
+        # other thread
+        on_thread { Context.default == nil }.should == true
+      end
+
+      on_thread do
+        Context.withDefault(context) do
+          Context.default == context
+        end
+      end.should == true
+    end
+
+    # TODO RM bug: always prints exception, even if it's rescued.
+    it "ensures the default context reverts after a withDefault block in case of an exception" do
+      exception = nil
+      begin
+        context = Context.context
+        Context.withDefault(context) do
+          raise "ohnoes!"
+        end
+      rescue Object => exception
+      end
+      exception.message.should == "ohnoes!"
+      Context.default.should == Context.main
+    end
+
     # TODO currently these methods yield the default context, I'm pretty sure
     # that's not supposed to be the case. Waiting to hear from Saul Mora.
     #

@@ -3,6 +3,20 @@ module MotionData
     class << self
       attr_accessor :root, :main
 
+      # This returns the default context for the current thread. On the main
+      # thread this will be `Context.main` and on other threads this will lazy
+      # load (and cache) a context through `Context.context`
+      def default
+        Thread.current[:motionDataDefaultContext] || (main if NSThread.mainThread?)
+      end
+
+      def withDefault(context)
+        Thread.current[:motionDataDefaultContext] = context
+        yield
+      ensure
+        Thread.current[:motionDataDefaultContext] = nil
+      end
+
       # This is the root context for all contexts managed by MotionData, which
       # is used to actually save data to the persistent store.
       #
