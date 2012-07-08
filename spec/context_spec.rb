@@ -69,14 +69,40 @@ module MotionData
       Context.default.should == Context.main
     end
 
-    it "performs a block on a context which changes the default context for the duration of the block" do
-      context = Context.context
-      thread  = Thread.current
-      @result = false
-      context.perform do |c|
-        @result = Thread.current != thread && Context.default == context && c == context
+    describe "concerning performing work on the context" do
+      it "changes the default context for the duration of the block which is performed asynchronously" do
+        context = Context.context
+        thread  = Thread.current
+        @result = false
+
+        return_value = context.perform(:background => true) do |c|
+          # first save the status, but don't save into @result yet
+          r = Thread.current != thread && Context.default == context && c == context
+          sleep 0.1
+          # after 0.1s save into @result
+          @result = r
+          :from_block
+        end
+        return_value.should == nil
+
+        @result.should == false
+        wait 0.3 do
+          @result.should == true
+        end
       end
-      wait 0.1 do
+
+      it "changes the default context for the duration of the block which is performed synchronously" do
+        context = Context.context
+        thread  = Thread.current
+        @result = false
+
+        return_value = context.perform do |c|
+          r = Thread.current == thread && Context.default == context && c == context
+          sleep 0.1
+          @result = r
+          :from_block
+        end
+        return_value.should == :from_block
         @result.should == true
       end
     end
@@ -84,28 +110,27 @@ module MotionData
     # TODO currently these methods yield the default context, I'm pretty sure
     # that's not supposed to be the case. Waiting to hear from Saul Mora.
     #
-    describe "concerning transactional saving, on a background thread, to the parent context" do
-      # This is to ensure that we properly fix MagicalRecord that would always return a NSManagedObjectContext
-      # TODO create patch
-      #it "yields a MotionData::Context instance" do
-        #localContextClass = nil
-        #MotionData::ManagedObject.saveInBackground do |localContext|
-          #localContextClass = localContext.class
-        #end
-        #wait 0.1 do
-          #localContextClass.should == MotionData::Context
-        #end
-      #end
+    describe "concerning transactional saving to the parent context" do
+      it "yields a Context instance that is a child of the context" do
+        @result = false
+        Context.main.transaction do |localContext|
+          @result = localContext.instance_of?(Context) &&
+                      Context.default == localContext &&
+                        localContext.parentContext == Context.main
+        end
+        @result.should == true
+      end
 
-      #it "is performed in a seperate context" do
-        #localContextIsChildOfDefaultContext = nil
-        #MotionData::ManagedObject.saveInBackground do |localContext|
-          #localContextIsChildOfDefaultContext = (localContext.parentContext == NSManagedObjectContext.defaultContext)
-        #end
-        #wait 0.1 do
-          #localContextIsChildOfDefaultContext.should == true
-        #end
-      #end
+      it "merges the changes into the parent context afterwards" do
+        Context.main.transaction :background => true do
+          Author.new(:name => "Edgar Allan Poe")
+          sleep 0.1
+        end
+        Author.all.size.should == 0
+        wait 0.3 do
+          Author.all.map(&:name).should == ["Edgar Allan Poe"]
+        end
+      end
     end
   end
 

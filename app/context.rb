@@ -68,13 +68,33 @@ module MotionData
     # Performs a block on the context's dispatch queue, while changing
     # `Context.default` to the context for the duration of the block.
     #
+    # Options:
+    #
+    # * `:background` - If `true` the block is executed asynchronously.
+    #                   Otherwise, the block is performed synchronously and the
+    #                   result of the block is returned.
+    #
     # Optionally yields the context.
-    def perform(&block)
-      performBlock(lambda do
+    def perform(options = {}, &block)
+      result = nil
+      work   = lambda do
         Context.withDefault(self) do
-          block.call(self)
+          result = block.call(self)
         end
-      end)
+      end
+      options[:background] ? performBlock(work) : performBlockAndWait(work)
+      result
+    end
+
+    # TODO return wether or the save was a success
+    def transaction(options = {}, &block)
+      c = context
+      c.perform(options, &block)
+      c.perform(options) do
+        unless c.save(nil)
+          # TODO handleError(error)
+        end
+      end
     end
   end
 end
