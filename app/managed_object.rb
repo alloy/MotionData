@@ -47,16 +47,14 @@ module MotionData
       def all
         scope = NSFetchRequest.new
         scope.entity = entityDescription
-        results = nil
         # Encueing the fetch like this ensures other transactions on the context
         # have been run.
         #
         # This is what MagicalRecord does too.
-        Context.current.performBlockAndWait(lambda do
-          results = Context.current.executeFetchRequest(scope, error:nil)
+        Context.current.perform do
+          Context.current.executeFetchRequest(scope, error:nil)
           # TODO handleError(error) unless results
-        end)
-        results
+        end
       end
     end
   end
