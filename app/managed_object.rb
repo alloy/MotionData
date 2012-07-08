@@ -11,12 +11,12 @@ module MotionData
     class << self
 
       def new(properties = nil)
-        context = Thread.current[:localContext] || NSManagedObjectContext.contextForCurrentThread
-        newInContext(context, properties)
+        #context = Thread.current[:localContext] || NSManagedObjectContext.contextForCurrentThread
+        newInContext(Context.main, properties)
       end
 
       def newInContext(context, properties = nil)
-        entity = createInContext(context)
+        entity = alloc.initWithEntity(entityDescription, insertIntoManagedObjectContext:context)
         properties.each { |k, v| entity.send("#{k}=", v) } if properties
         entity
       end
