@@ -69,12 +69,24 @@ module MotionData
       Context.default.should == Context.main
     end
 
+    it "performs a block on a context which changes the default context for the duration of the block" do
+      context = Context.context
+      thread  = Thread.current
+      @result = false
+      context.perform do |c|
+        @result = Thread.current != thread && Context.default == context && c == context
+      end
+      wait 0.1 do
+        @result.should == true
+      end
+    end
+
     # TODO currently these methods yield the default context, I'm pretty sure
     # that's not supposed to be the case. Waiting to hear from Saul Mora.
     #
-    #describe "concerning saving on a background thread" do
-      ## This is to ensure that we properly fix MagicalRecord that would always return a NSManagedObjectContext
-      ## TODO create patch
+    describe "concerning transactional saving, on a background thread, to the parent context" do
+      # This is to ensure that we properly fix MagicalRecord that would always return a NSManagedObjectContext
+      # TODO create patch
       #it "yields a MotionData::Context instance" do
         #localContextClass = nil
         #MotionData::ManagedObject.saveInBackground do |localContext|
@@ -94,7 +106,7 @@ module MotionData
           #localContextIsChildOfDefaultContext.should == true
         #end
       #end
-    #end
+    end
   end
 
 end

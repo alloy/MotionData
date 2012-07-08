@@ -45,7 +45,7 @@ module MotionData
       # These are used to perform work in the background and then push that to
       # the main queue.
       def context
-        new(main)
+        main.context
       end
 
       # MotionData contexts are, besides the main context, always of type
@@ -55,6 +55,26 @@ module MotionData
         context.parentContext = parent if parent # do NOT set `nil`
         context
       end
+    end
+
+    # Returns a new private queue context that is a child of the this context.
+    #
+    # These are used to perform work in the background and then push that to
+    # the main queue.
+    def context
+      self.class.new(self)
+    end
+
+    # Performs a block on the context's dispatch queue, while changing
+    # `Context.default` to the context for the duration of the block.
+    #
+    # Optionally yields the context.
+    def perform(&block)
+      performBlock(lambda do
+        Context.withDefault(self) do
+          block.call(self)
+        end
+      end)
     end
   end
 end
