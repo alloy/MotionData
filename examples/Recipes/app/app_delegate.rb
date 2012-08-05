@@ -11,8 +11,6 @@ class RecipeListTableViewController < UITableViewController
     unless fetchedResultsController.performFetch(error)
       puts "Error occured during fetch: #{error.localizedDescription}"
     end
-
-    p fetchedResultsController.fetchedObjects
   end
 
   def fetchedResultsController
@@ -45,10 +43,10 @@ class RecipeListTableViewController < UITableViewController
 
   def tableView(tableView, cellForRowAtIndexPath:indexPath)
     unless recipeCell = tableView.dequeueReusableCellWithIdentifier('RecipeCellIdentifier')
-      recipeCell = UITableViewCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:'RecipeCellIdentifier')
+      recipeCell = RecipeTableViewCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:'RecipeCellIdentifier')
       recipeCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator
     end
-    recipeCell.textLabel.text = fetchedResultsController.objectAtIndexPath(indexPath).name
+    recipeCell.recipe = fetchedResultsController.objectAtIndexPath(indexPath)
     recipeCell
   end
 end
@@ -63,9 +61,8 @@ class AppDelegate
     setupCoreDataStack
 
     recipe = Recipe.new(:name => 'Fries')
-    p recipe
+    recipe.image = Image.new(:image => UIImage.imageNamed('fries.jpg'))
     p recipe.ingredients
-    p recipe.image
     p recipe.type
 
     #p Recipe.all
