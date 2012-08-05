@@ -3,6 +3,12 @@ module MotionData
   module CoreTypes
     class Boolean
     end
+
+    class Integer16
+    end
+
+    class Transformable
+    end
   end
 
   class ManagedObject < NSManagedObject
@@ -30,12 +36,14 @@ module MotionData
         end
       end
 
-      def belongsTo(name, options = {})
-        #puts "#{self.name} belongs to `#{name}' (#{options.inspect})"
+      def hasOne(name, options = {})
+        puts "#{self.name} has one `#{name}' (#{options.inspect})"
+        entityDescription.hasOne(name, options)
       end
 
       def hasMany(name, options = {})
-        #puts "#{self.name} has many `#{name}' (#{options.inspect})"
+        puts "#{self.name} has many `#{name}' (#{options.inspect})"
+        entityDescription.hasMany(name, options)
       end
 
       def property(name, type, options = {})

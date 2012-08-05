@@ -41,7 +41,7 @@
 				<string key="IBProxiedObjectIdentifier">IBFirstResponder</string>
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 			</object>
-			<object class="IBProxyObject" id="789452129">
+			<object class="IBProxyObject" id="868295164">
 				<string key="IBProxiedObjectIdentifier">AppDelegate</string>
 				<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 			</object>
@@ -51,7 +51,6 @@
 				<object class="NSPSMatrix" key="NSFrameMatrix"/>
 				<string key="NSFrameSize">{320, 480}</string>
 				<reference key="NSSuperview"/>
-				<reference key="NSWindow"/>
 				<reference key="NSNextKeyView"/>
 				<object class="NSColor" key="IBUIBackgroundColor">
 					<int key="NSColorSpace">1</int>
@@ -78,7 +77,6 @@
 							<string key="NSResourceName">fork.png</string>
 						</object>
 						<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-						<reference key="IBUITabBar" ref="797257077"/>
 					</object>
 					<reference key="IBUIParentViewController" ref="211259371"/>
 					<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics"/>
@@ -125,7 +123,6 @@
 								<string key="NSResourceName">convert.png</string>
 							</object>
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-							<reference key="IBUITabBar" ref="797257077"/>
 						</object>
 						<reference key="IBUIParentViewController" ref="211259371"/>
 						<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics"/>
@@ -172,7 +169,6 @@
 					<int key="NSvFlags">266</int>
 					<string key="NSFrame">{{0, 431}, {320, 49}}</string>
 					<reference key="NSSuperview"/>
-					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView"/>
 					<object class="NSColor" key="IBUIBackgroundColor">
 						<int key="NSColorSpace">3</int>
@@ -180,12 +176,6 @@
 					</object>
 					<bool key="IBUIClearsContextBeforeDrawing">NO</bool>
 					<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
-					<object class="NSMutableArray" key="IBUIItems">
-						<bool key="EncodedWithXMLCoder">YES</bool>
-						<reference ref="612418019"/>
-						<reference ref="818364874"/>
-					</object>
-					<reference key="IBUISelectedItem" ref="612418019"/>
 				</object>
 			</object>
 		</object>
@@ -196,14 +186,14 @@
 					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="841351856"/>
-						<reference key="destination" ref="789452129"/>
+						<reference key="destination" ref="868295164"/>
 					</object>
 					<int key="connectionID">34</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">window</string>
-						<reference key="source" ref="789452129"/>
+						<reference key="source" ref="868295164"/>
 						<reference key="destination" ref="380026005"/>
 					</object>
 					<int key="connectionID">35</int>
@@ -211,7 +201,7 @@
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">tabBarController</string>
-						<reference key="source" ref="789452129"/>
+						<reference key="source" ref="868295164"/>
 						<reference key="destination" ref="211259371"/>
 					</object>
 					<int key="connectionID">36</int>
@@ -219,7 +209,7 @@
 				<object class="IBConnectionRecord">
 					<object class="IBCocoaTouchOutletConnection" key="connection">
 						<string key="label">recipeListController</string>
-						<reference key="source" ref="789452129"/>
+						<reference key="source" ref="868295164"/>
 						<reference key="destination" ref="909510972"/>
 					</object>
 					<int key="connectionID">37</int>
@@ -352,7 +342,7 @@
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">33</int>
-						<reference key="object" ref="789452129"/>
+						<reference key="object" ref="868295164"/>
 						<reference key="parent" ref="957960031"/>
 					</object>
 				</object>

@@ -3,10 +3,48 @@ module MotionData
     Schema.current.setupCoreDataStackWithInMemoryStore
   end
 
+  def self.setupCoreDataStackWithSQLiteStore(path)
+    Schema.current.setupCoreDataStackWithSQLiteStore(path)
+  end
+
   class EntityDescription < NSEntityDescription
-    def property(name, type, options={})
+    def property(name, type, options = {})
       ad = AttributeDescription.withReflection(:name => name, :type => type, :options => options)
       self.properties = properties.arrayByAddingObject(ad)
+    end
+
+    def hasOne(name, options = {})
+      relationshipDescriptionWithOptions({ :name => name, :maxCount => 1 }.merge(options))
+    end
+
+    def hasMany(name, options = {})
+      relationshipDescriptionWithOptions({ :name => name, :maxCount => -1 }.merge(options))
+    end
+
+    private
+
+    def relationshipDescriptionWithOptions(options)
+      rd = NSRelationshipDescription.new
+      inverseName = options.delete(:inverse)
+
+      options.each do |key, value|
+        rd.send("#{key}=", value)
+      end
+
+      # There is a chicken-and-egg problem, which is that the inverse
+      # relationship doesn't exist yet, by the time this relationship is
+      # defined, if this is the first model that defines a part of this
+      # relationship.
+      if inverseName && inverse = rd.destinationEntity.relationshipsByName[inverseName.to_s]
+        rd.inverseRelationship = inverse
+        inverse.inverseRelationship = rd
+        puts rd.debugDescription
+        puts
+        puts inverse.debugDescription
+        puts
+      end
+
+      self.properties = properties.arrayByAddingObject(rd)
     end
   end
 
@@ -21,8 +59,14 @@ module MotionData
       ad.optional            = !reflection[:options][:required]
 
       type = reflection[:type]
-      ad.attributeType = if type == String then NSStringAttributeType
-                         elsif type == CoreTypes::Boolean then NSBooleanAttributeType
+      ad.attributeType = if type == String
+                           NSStringAttributeType
+                         elsif type == CoreTypes::Boolean
+                           NSBooleanAttributeType
+                         elsif type == CoreTypes::Transformable
+                           NSTransformableAttributeType
+                         elsif type == CoreTypes::Integer16
+                           NSInteger16AttributeType
                          else
                            # Transient types?
                            NSUndefinedAttributeType
@@ -48,6 +92,11 @@ module MotionData
     def setupCoreDataStackWithInMemoryStore
       Context.root = Context.main = nil
       StoreCoordinator.default = StoreCoordinator.inMemory(self)
+    end
+
+    def setupCoreDataStackWithSQLiteStore(path)
+      Context.root = Context.main = nil
+      StoreCoordinator.default = StoreCoordinator.onDiskStore(self, path)
     end
 
     # TODO handle errors!

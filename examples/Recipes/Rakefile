@@ -5,4 +5,24 @@ require 'motion/project'
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'Recipes'
+
+  app.files = %w{
+    schema.rb
+    store_coordinator.rb
+    context.rb
+    managed_object.rb
+  }.map { |f| "../../app/#{f}" } + Dir.glob('app/**/*.rb')
+
+  app.frameworks += %w{ CoreData }
+end
+
+desc "Run app with Core Data SQLDebug enabled"
+task :debug => 'build:simulator' do
+  ios_sim = `which ios-sim`.strip
+  if ios_sim.empty?
+    puts "Install ios-sim with: $ brew install ios-sim"
+    exit 1
+  else
+    sh "#{ios_sim} launch build/iPhoneSimulator-5.1-Development/Recipes.app --args -com.apple.CoreData.SQLDebug 1"
+  end
 end
