@@ -1,7 +1,5 @@
 .repl_history
-.*.sw?
 build
 resources/*.nib
 resources/*.momd
 resources/*.storyboardc
-examples/**/*.nib
