@@ -96,5 +96,9 @@ module MotionData
         end
       end
     end
+
+    def objectsInContext(*objectsFromOtherContext)
+      objectsFromOtherContext.map { |object| objectWithID(object.objectID) }
+    end
   end
 end

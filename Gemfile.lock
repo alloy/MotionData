@@ -1,8 +1,8 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    ffi (1.0.11)
-    kicker (2.6.1)
+    ffi (1.1.1)
+    kicker (3.0.0pre1)
       listen
     listen (0.4.7)
       rb-fchange (~> 0.0.5)
@@ -18,4 +18,4 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  kicker
+  kicker (= 3.0.0pre1)
