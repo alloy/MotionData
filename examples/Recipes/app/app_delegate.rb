@@ -37,8 +37,6 @@ EOS
     )
     recipe.type = RecipeType.new(:name => 'Fast-food')
     recipe.image = Image.new(:image => UIImage.imageNamed('fries.jpg'))
-    p recipe.ingredients
-    p recipe.type
   end
 
   def setupCoreDataStack

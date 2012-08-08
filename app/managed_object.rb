@@ -64,7 +64,16 @@ module MotionData
           # TODO handleError(error) unless results
         end
       end
+
     end
+
+    def writeAttribute(key, value)
+      key = key.to_s
+      willChangeValueForKey(key)
+      setPrimitiveValue(value, forKey:key)
+      didChangeValueForKey(key)
+    end
+
   end
 
 end

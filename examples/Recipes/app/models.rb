@@ -60,4 +60,18 @@ class Recipe < MotionData::ManagedObject
   hasMany :ingredients, :destinationEntity => Ingredient.entityDescription, :inverse => :recipe
   hasOne :image, :destinationEntity => Image.entityDescription, :inverse => :recipe
   hasOne :type, :destinationEntity => RecipeType.entityDescription, :inverse => :recipes
+
+  def image=(imageEntity)
+    writeAttribute(:image, imageEntity)
+
+    image = imageEntity.image
+    size  = image.size
+    ratio = size.width > size.height ? 44.0 / size.width : 44.0 / size.height
+    rect  = CGRectMake(0, 0, ratio * size.width, ratio * size.height)
+
+    UIGraphicsBeginImageContext(rect.size)
+    image.drawInRect(rect)
+    self.thumbnailImage = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+  end
 end

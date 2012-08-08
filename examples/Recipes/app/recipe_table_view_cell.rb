@@ -72,8 +72,7 @@ class RecipeTableViewCell < UITableViewCell
 
   def recipe=(recipe)
     @recipe = recipe
-    #@imageView.image = recipe.thumbnailImage
-    @imageView.image = recipe.image.image
+    @imageView.image = recipe.thumbnailImage
     @nameLabel.text = recipe.name
     @overviewLabel.text = recipe.overview
     @prepTimeLabel.text = recipe.prepTime

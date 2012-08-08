@@ -257,16 +257,7 @@ class RecipeDetailViewController < UITableViewController
 
     # TODO this should also use the @recipe's context, instead of the current/main.
     #image = @recipe.newImage({})
-    image = Image.new(:image => selectedImage)
-
-    size  = selectedImage.size
-    ratio = size.width > size.height ? 44.0 / size.width : 44.0 / size.height
-    rect  = CGRectMake(0, 0, ratio * size.width, ratio * size.height)
-
-    UIGraphicsBeginImageContext(rect.size)
-    selectedImage.drawInRect(rect)
-    @recipe.thumbnailImage = UIGraphicsGetImageFromCurrentImageContext()
-    UIGraphicsEndImageContext()
+    @recipe.image = Image.new(:image => selectedImage)
 
     dismissModalViewControllerAnimated(true)
   end
