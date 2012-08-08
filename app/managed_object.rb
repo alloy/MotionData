@@ -37,12 +37,12 @@ module MotionData
       end
 
       def hasOne(name, options = {})
-        puts "#{self.name} has one `#{name}' (#{options.inspect})"
+        #puts "#{self.name} has one `#{name}' (#{options.inspect})"
         entityDescription.hasOne(name, options)
       end
 
       def hasMany(name, options = {})
-        puts "#{self.name} has many `#{name}' (#{options.inspect})"
+        #puts "#{self.name} has many `#{name}' (#{options.inspect})"
         entityDescription.hasMany(name, options)
       end
 

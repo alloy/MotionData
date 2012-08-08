@@ -16,6 +16,8 @@ class ImageToDataTransformer < NSValueTransformer
   end
 end
 
+# TODO Curretly these have to be defined first, so that there entityDescription
+# can be used while defining associations. This should not be needed.
 class Image < MotionData::ManagedObject
 end
 
@@ -31,7 +33,7 @@ end
 class Image < MotionData::ManagedObject
   property :image, Transformable, :transformer => ImageToDataTransformer
 
-  hasOne :recipe, :destinationEntity => Recipe.entityDescription, :inverse => :image #, :inverseRelationship => Recipe.entityDescription.relationshipsByName['image']
+  hasOne :recipe, :destinationEntity => Recipe.entityDescription, :inverse => :image
 end
 
 class Ingredient < MotionData::ManagedObject

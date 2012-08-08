@@ -38,10 +38,10 @@ module MotionData
       if inverseName && inverse = rd.destinationEntity.relationshipsByName[inverseName.to_s]
         rd.inverseRelationship = inverse
         inverse.inverseRelationship = rd
-        puts rd.debugDescription
-        puts
-        puts inverse.debugDescription
-        puts
+        #puts rd.debugDescription
+        #puts
+        #puts inverse.debugDescription
+        #puts
       end
 
       self.properties = properties.arrayByAddingObject(rd)

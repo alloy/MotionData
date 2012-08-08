@@ -1,3 +1,4 @@
+* Rename `new` methods, like Image.new or a relationship Recipe#newImage, to `insert` to adhere to CD name?
 * Rename Schema to Model to adhere to CD name?
 * The `class` of an association should be inflected from the name.
 * Is it better to follow the original CoreData names such as the `optional` property of NSAttributeDescription, instead of using `:required` as the option?

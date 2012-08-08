@@ -1,56 +1,3 @@
-class RecipeListTableViewController < UITableViewController
-  def viewDidLoad
-    self.title = 'Recipes'
-    self.navigationItem.leftBarButtonItem = editButtonItem
-    self.navigationItem.rightBarButtonItem = UIBarButtonItem.alloc.initWithBarButtonSystemItem(UIBarButtonSystemItemAdd,
-                                                                                        target:self,
-                                                                                        action:'add:')
-    self.tableView.rowHeight = 44
-
-    error = Pointer.new(:object)
-    unless fetchedResultsController.performFetch(error)
-      puts "Error occured during fetch: #{error.localizedDescription}"
-    end
-  end
-
-  def fetchedResultsController
-    @fetchedResultsController ||= begin
-      request = NSFetchRequest.new
-      request.entity = Recipe.entityDescription
-      request.sortDescriptors = [NSSortDescriptor.alloc.initWithKey('name', ascending:true)]
-
-      controller = NSFetchedResultsController.alloc.initWithFetchRequest(request,
-                                                    managedObjectContext:MotionData::Context.current,
-                                                      sectionNameKeyPath:nil,
-                                                               cacheName:'Root')
-      controller.delegate = self
-      controller
-    end
-  end
-
-  def numberOfSectionsInTableView(tableView)
-    count = fetchedResultsController.sections.count
-    count == 0 ? 1 : count
-  end
-
-  def tableView(tableView, numberOfRowsInSection:index)
-    if section = fetchedResultsController.sections[index]
-      section.numberOfObjects
-    else
-      0
-    end
-  end
-
-  def tableView(tableView, cellForRowAtIndexPath:indexPath)
-    unless recipeCell = tableView.dequeueReusableCellWithIdentifier('RecipeCellIdentifier')
-      recipeCell = RecipeTableViewCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:'RecipeCellIdentifier')
-      recipeCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator
-    end
-    recipeCell.recipe = fetchedResultsController.objectAtIndexPath(indexPath)
-    recipeCell
-  end
-end
-
 class UnitConverterTableViewController < UIViewController
 end
 
@@ -60,11 +7,7 @@ class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)
     setupCoreDataStack
 
-    recipe = Recipe.new(:name => 'Fries')
-    recipe.image = Image.new(:image => UIImage.imageNamed('fries.jpg'))
-    p recipe.ingredients
-    p recipe.type
-
+    loadSeeds
     #p Recipe.all
 
     nib = UINib.nibWithNibName('MainWindow', bundle:nil)
@@ -76,14 +19,36 @@ class AppDelegate
     true
   end
 
+  def loadSeeds
+    recipe = Recipe.new(
+      :name         => 'Fries',
+      :prepTime     => '40 minutes',
+      :overview     => 'French fries (American English, with "French" often capitalized), ' \
+                       'or chips, fries, or French-fried potatoes are batons of deep-fried potato.',
+      :instructions => <<-EOS
+Rinse cut potatoes in a large bowl with lots of cold running water until water becomes clear. Cover with water by 1-inch and cover with ice. Refrigerate at least 30 minutes and up to 2 days.
+
+In a 5-quart pot or Dutch oven fitted with a candy or deep-frying thermometer, (or in an electric deep fryer), heat oil over medium-low heat until the thermometer registers 325 degrees F. Make sure that you have at least 3 inches of space between the top of the oil and the top of the pan, as fries will bubble up when they are added.
+
+Drain ice water from cut fries and wrap potato pieces in a clean dishcloth or tea towel and thoroughly pat dry. Increase the heat to medium-high and add fries, a handful at a time, to the hot oil. Fry, stirring occasionally, until potatoes are soft and limp and begin to turn a blond color, about 6 to 8 minutes. Using a skimmer or a slotted spoon, carefully remove fries from the oil and set aside to drain on paper towels. Let rest for at least 10 minutes or up to 2 hours.
+
+When ready to serve the French fries, reheat the oil to 350 degrees F. Transfer the blanched potatoes to the hot oil and fry again, stirring frequently, until golden brown and puffed, about 1 minute. Transfer to paper lined platter and sprinkle with salt and pepper, to taste. Serve immediately.
+EOS
+    )
+    recipe.type = RecipeType.new(:name => 'Fast-food')
+    recipe.image = Image.new(:image => UIImage.imageNamed('fries.jpg'))
+    p recipe.ingredients
+    p recipe.type
+  end
+
   def setupCoreDataStack
     storePath = File.join(applicationDocumentsDirectory, 'Recipes.sqlite')
     #unless File.exist?(storePath)
+      #loadSeeds
       #defaultStorePath = NSBundle.mainBundle.pathForResource('RecipeData/Recipes', ofType:'sqlite')
       #NSFileManager.defaultManager.copyItemAtPath(defaultStorePath, toPath:storePath, error:nil)
     #end
     MotionData.setupCoreDataStackWithSQLiteStore(storePath)
-    #p MotionData::StoreCoordinator.default.persistentStores.first.metadata
   end
 
   def applicationDocumentsDirectory
