@@ -69,7 +69,7 @@ class RecipeDetailViewController < UITableViewController
       # TODO
       error = Pointer.new(:object)
       unless MotionData::Context.main.save(error)
-        puts "Unresolved error: #{error[0].debugDescription}"
+        raise "Unresolved error: #{error[0].debugDescription}"
       end
     end
   end
@@ -145,7 +145,7 @@ class RecipeDetailViewController < UITableViewController
                             when TYPE_SECTION
                               cell.accessoryType = UITableViewCellAccessoryNone
                               cell.editingAccessoryType = UITableViewCellAccessoryDisclosureIndicator
-                              @recipe.type.name
+                              @recipe.type.name if @recipe.type
                             when INSTRUCTIONS_SECTION
                               cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator
                               cell.editingAccessoryType = UITableViewCellAccessoryNone
@@ -160,7 +160,7 @@ class RecipeDetailViewController < UITableViewController
   def tableView(tableView, willSelectRowAtIndexPath:indexPath)
     # * If editing, don't allow instructions to be selected
     # * Not editing: Only allow instructions to be selected
-    if (editing? && indexPath.section == INSTRUCTIONS_SECTION) || (!editing? && section != INSTRUCTIONS_SECTION)
+    if (editing? && indexPath.section == INSTRUCTIONS_SECTION) || (!editing? && indexPath.section != INSTRUCTIONS_SECTION)
       tableView.deselectRowAtIndexPath(indexPath, animated:true)
       nil
     else
@@ -258,7 +258,6 @@ class RecipeDetailViewController < UITableViewController
     # TODO this should also use the @recipe's context, instead of the current/main.
     #image = @recipe.newImage({})
     image = Image.new(:image => selectedImage)
-    @recipe.image = image
 
     size  = selectedImage.size
     ratio = size.width > size.height ? 44.0 / size.width : 44.0 / size.height

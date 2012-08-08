@@ -14,11 +14,18 @@ class RecipeListTableViewController < UITableViewController
   end
 
   def add(sender)
-    
+    controller = RecipeAddViewController.alloc.initWithNibName('RecipeAddView', bundle:nil)
+    controller.delegate = self
+    # TODO do in new context?
+    controller.recipe = Recipe.new
+
+    navigationController = UINavigationController.alloc.initWithRootViewController(controller)
+    presentModalViewController(navigationController, animated:true)
   end
 
   def recipeAddViewController(controller, didAddRecipe:recipe)
-    
+    showRecipe(recipe, animated:false) if recipe
+    dismissModalViewControllerAnimated(true)
   end
 
   def showRecipe(recipe, animated:animated)
