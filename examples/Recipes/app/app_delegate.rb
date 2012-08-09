@@ -37,6 +37,11 @@ EOS
     )
     recipe.type = RecipeType.new(:name => 'Fast-food')
     recipe.image = Image.new(:image => UIImage.imageNamed('fries.jpg'))
+    [{ :name => 'Potatoes', :amount => '1 KG' }, { :name => 'Mayonnaise', :amount => '1 jar' }].each_with_index do |ingredient, index|
+      # TODO
+      #recipe.ingredients.new(ingredient.merge(:displayOrder => index))
+      recipe.addIngredientsObject(Ingredient.new(ingredient.merge(:displayOrder => index)))
+    end
   end
 
   def setupCoreDataStack
