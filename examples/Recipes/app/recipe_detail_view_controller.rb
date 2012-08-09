@@ -19,8 +19,7 @@ class RecipeDetailViewController < UITableViewController
   def viewWillAppear(animated)
     super
 
-    #@photoButton.setImage(recipe.thumbnailImage, forState:UIControlStateNormal)
-    @photoButton.setImage(@recipe.image, forState:UIControlStateNormal)
+    @photoButton.setImage(recipe.thumbnailImage, forState:UIControlStateNormal)
     navigationItem.title = @nameTextField.text = @recipe.name
     overviewTextField.text = @recipe.overview
     prepTimeTextField.text = @recipe.prepTime
