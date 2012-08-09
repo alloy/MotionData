@@ -120,7 +120,7 @@ class RecipeDetailViewController < UITableViewController
     if indexPath.section == INGREDIENTS_SECTION
       if indexPath.row < @recipe.ingredients.count
         unless cell = tableView.dequeueReusableCellWithIdentifier('IngredientsCell')
-          cell = UITableViewCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:'IngredientsCell')
+          cell = UITableViewCell.alloc.initWithStyle(UITableViewCellStyleSubtitle, reuseIdentifier:'IngredientsCell')
           cell.accessoryType = UITableViewCellAccessoryNone
         end
         ingredient = @ingredients[indexPath.row]
