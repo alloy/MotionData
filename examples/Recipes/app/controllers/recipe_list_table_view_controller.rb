@@ -35,6 +35,9 @@ class RecipeListTableViewController < UITableViewController
   end
 
   def fetchedResultsController
+    # TODO
+    # @fetchedResultsController ||= Recipe.all.sortBy(:name, ascending:true).resultsController('Root').tap { |c| c.delegate = self }
+    # @fetchedResultsController ||= Recipe.all.sortBy(:name).resultsController('Root').tap { |c| c.delegate = self }
     @fetchedResultsController ||= begin
       request = NSFetchRequest.new
       request.entity = Recipe.entityDescription

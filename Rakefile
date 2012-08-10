@@ -8,6 +8,7 @@ Motion::Project::App.setup do |app|
     app/schema.rb
     app/store_coordinator.rb
     app/context.rb
+    app/predicate.rb
     app/managed_object.rb
 
     app/article.rb

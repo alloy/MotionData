@@ -1,5 +1,5 @@
 class Article < MotionData::ManagedObject
-  belongsTo :author, :class => 'Author'
+  #hasOne :author, :class => 'Author'
 
   property :title,     String,  :required => true
   property :body,      String,  :required => true
