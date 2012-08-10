@@ -1,30 +1,48 @@
-module MotionData
-  class Predicate < NSComparisonPredicate
-    def inspect
-      "(#{predicateFormat})"
-    end
+# TODO RM BridgeSupport bug
+NSLocaleSensitivePredicateOption = 8
 
+class NSPredicate
+  def inspect
+    "(#{predicateFormat})"
+  end
+end
+
+module MotionData
+  module Predicate
     def and(predicate)
-      NSCompoundPredicate.andPredicateWithSubpredicates([self, predicate])
+      Compound.andPredicateWithSubpredicates([self, predicate])
     end
 
     def or(predicate)
-      NSCompoundPredicate.orPredicateWithSubpredicates([self, predicate])
+      Compound.orPredicateWithSubpredicates([self, predicate])
     end
 
-    class KeyPathExpression
+    class Comparison < NSComparisonPredicate
+      include Predicate
+    end
+
+    class Compound < NSCompoundPredicate
+      include Predicate
+    end
+
+    class ComparableKeyPathExpression
       module Mixin
         def keyPath(keyPath)
-          KeyPathExpression.new(keyPath)
+          ComparableKeyPathExpression.new(keyPath)
         end
         alias_method :key, :keyPath
       end
 
-      attr_reader :expression
+      attr_reader :expression, :comparisonOptions
 
       def initialize(keyPath)
         @expression = NSExpression.expressionForKeyPath(keyPath.to_s)
+        @comparisonOptions = 0
       end
+
+      def caseInsensitive;      @comparisonOptions |= NSCaseInsensitivePredicateOption;      self; end
+      def diacriticInsensitive; @comparisonOptions |= NSDiacriticInsensitivePredicateOption; self; end
+      def localeSensitive;      @comparisonOptions |= NSLocaleSensitivePredicateOption;      self; end
 
       def  <(value); comparisonWith(value, type:NSLessThanPredicateOperatorType);             end
       def  >(value); comparisonWith(value, type:NSGreaterThanPredicateOperatorType);          end
@@ -32,7 +50,6 @@ module MotionData
       def >=(value); comparisonWith(value, type:NSGreaterThanOrEqualToPredicateOperatorType); end
       def !=(value); comparisonWith(value, type:NSNotEqualToPredicateOperatorType);           end
       def ==(value); comparisonWith(value, type:NSEqualToPredicateOperatorType);              end
-
 
       def between?(min, max);  comparisonWith([min, max], type:NSBetweenPredicateOperatorType);    end
       def include?(value);     comparisonWith(value,      type:NSContainsPredicateOperatorType);   end
@@ -44,11 +61,11 @@ module MotionData
 
       def comparisonWith(value, type:comparisonType)
         value = NSExpression.expressionForConstantValue(value)
-        Predicate.predicateWithLeftExpression(@expression,
-                                          rightExpression:value,
-                                                 modifier:NSDirectPredicateModifier,
-                                                     type:comparisonType,
-                                                  options:0)
+        Comparison.predicateWithLeftExpression(@expression,
+                               rightExpression:value,
+                                      modifier:NSDirectPredicateModifier,
+                                          type:comparisonType,
+                                       options:@comparisonOptions)
       end
     end
   end
