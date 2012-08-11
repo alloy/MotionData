@@ -62,7 +62,23 @@ module MotionData
     end
 
     it "does not modify the original scopes" do
-      
+      scope1 = Scope.alloc.initWithTarget(Author)
+
+      scope2 = scope1.where(:name => 'bob')
+      scope2.object_id.should.not == scope1.object_id
+      scope2.predicate.object_id.should.not == scope1.predicate.object_id
+
+      scope3 = scope2.where(value(:name) == 'bob')
+      scope3.object_id.should.not == scope2.object_id
+      scope3.predicate.object_id.should.not == scope2.predicate.object_id
+
+      scope4 = scope3.where('name == %@', 'bob')
+      scope4.object_id.should.not == scope3.object_id
+      scope4.predicate.object_id.should.not == scope3.predicate.object_id
+
+      scope5 = scope4.where(NSPredicate.predicateWithFormat('name == "bob"'))
+      scope5.object_id.should.not == scope4.object_id
+      scope5.predicate.object_id.should.not == scope4.predicate.object_id
     end
   end
 
