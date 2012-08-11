@@ -1,35 +1,24 @@
 # TODO RM BridgeSupport bug
 NSLocaleSensitivePredicateOption = 8
 
+# I did not want open up classes, but it's undoable to handle NSPredicate and
+# its subclasses consistently throughout the lib without a lot of extending, in
+# which case all instances are techinally opened-up anyways.
 class NSPredicate
   def inspect
     "(#{predicateFormat})"
   end
+
+  def and(predicate)
+    NSCompoundPredicate.andPredicateWithSubpredicates([self, predicate])
+  end
+
+  def or(predicate)
+    NSCompoundPredicate.orPredicateWithSubpredicates([self, predicate])
+  end
 end
 
 module MotionData
-  class Predicate < NSPredicate
-    module Ext
-      def and(predicate)
-        CompoundPredicate.andPredicateWithSubpredicates([self, predicate])
-      end
-
-      def or(predicate)
-        CompoundPredicate.orPredicateWithSubpredicates([self, predicate])
-      end
-    end
-
-    include Predicate::Ext
-  end
-
-  class ComparisonPredicate < NSComparisonPredicate
-    include Predicate::Ext
-  end
-
-  class CompoundPredicate < NSCompoundPredicate
-    include Predicate::Ext
-  end
-
   class ComparableKeyPathExpression
     module Mixin
       def value(keyPath)
@@ -64,11 +53,11 @@ module MotionData
     private
 
     def comparisonWith(value, type:comparisonType)
-      ComparisonPredicate.predicateWithLeftExpression(@expression,
-                                      rightExpression:NSExpression.expressionForConstantValue(value),
-                                             modifier:NSDirectPredicateModifier,
-                                                 type:comparisonType,
-                                              options:@comparisonOptions)
+      NSComparisonPredicate.predicateWithLeftExpression(@expression,
+                                        rightExpression:NSExpression.expressionForConstantValue(value),
+                                               modifier:NSDirectPredicateModifier,
+                                                   type:comparisonType,
+                                                options:@comparisonOptions)
     end
   end
 end

@@ -20,21 +20,15 @@ module MotionData
     def where(conditions, *formatArguments)
       predicate = case conditions
                   when Hash
-                    CompoundPredicate.andPredicateWithSubpredicates(conditions.map do |keyPath, value|
+                    NSCompoundPredicate.andPredicateWithSubpredicates(conditions.map do |keyPath, value|
                       ComparableKeyPathExpression.new(keyPath) == value
                     end)
                   when Scope
                     conditions.predicate
-                  when Predicate::Ext
-                    # this is one of the MotionData predicate subclasses which mixes in the Ext module.
-                    conditions
                   when NSPredicate
-                    conditions.extend(Predicate::Ext)
                     conditions
                   when String
-                    conditions = NSPredicate.predicateWithFormat(conditions, argumentArray:formatArguments)
-                    conditions.extend(Predicate::Ext)
-                    conditions
+                    NSPredicate.predicateWithFormat(conditions, argumentArray:formatArguments)
                   end
 
       predicate = @predicate.and(predicate) if @predicate
