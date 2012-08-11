@@ -18,7 +18,10 @@ module MotionData
     end
 
     it "stores a copy of the given sort descriptors" do
-      
+      descriptors = [Object.new]
+      scope = Scope.alloc.initWithTarget(Author, predicate:nil, sortDescriptors:descriptors, inContext:nil)
+      scope.sortDescriptors.should == descriptors
+      scope.sortDescriptors.object_id.should.not == descriptors.object_id
     end
   end
 
@@ -97,8 +100,6 @@ module MotionData
   end
 
   describe Scope, "when building a new scope by adding sort conditions" do
-    extend Predicate::Builder::Mixin
-
     it "sorts by a property" do
       scope1 = Scope.alloc.initWithTarget(Author)
 

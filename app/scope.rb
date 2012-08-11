@@ -8,7 +8,8 @@ module MotionData
 
     def initWithTarget(target, predicate:predicate, sortDescriptors:sortDescriptors, inContext:context)
       if init
-        @target, @predicate, @sortDescriptors, @context = target, predicate, sortDescriptors, context
+        @target, @predicate, @context = target, predicate, context
+        @sortDescriptors = sortDescriptors.dup if sortDescriptors
       end
       self
     end
