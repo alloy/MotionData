@@ -1,7 +1,5 @@
 module MotionData
   class Scope
-    include Predicate::ComparableKeyPathExpression::Mixin
-
     attr_reader :target, :predicate, :sortDescriptors, :context
 
     def initWithTarget(target)
@@ -15,19 +13,28 @@ module MotionData
       self
     end
 
-    # Add finder conditions as a hash of requirements, a Scope, or a NSPredicate.
+    # Add finder conditions as a hash of requirements, a Scope, a NSPredicate,
+    # or a predicate format string with an optional list of arguments.
     #
     # The conditions are added using `AND`.
-    def where(conditions)
+    def where(conditions, *formatArguments)
       predicate = case conditions
                   when Hash
-                    Predicate::Compound.andPredicateWithSubpredicates(conditions.map do |kp, value|
-                      keyPath(kp) == value
+                    CompoundPredicate.andPredicateWithSubpredicates(conditions.map do |keyPath, value|
+                      ComparableKeyPathExpression.new(keyPath) == value
                     end)
-                  when NSPredicate
-                    conditions
                   when Scope
                     conditions.predicate
+                  when Predicate::Ext
+                    # this is one of the MotionData predicate subclasses which mixes in the Ext module.
+                    conditions
+                  when NSPredicate
+                    conditions.extend(Predicate::Ext)
+                    conditions
+                  when String
+                    conditions = NSPredicate.predicateWithFormat(conditions, argumentArray:formatArguments)
+                    conditions.extend(Predicate::Ext)
+                    conditions
                   end
 
       predicate = @predicate.and(predicate) if @predicate

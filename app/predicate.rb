@@ -8,65 +8,67 @@ class NSPredicate
 end
 
 module MotionData
-  module Predicate
-    def and(predicate)
-      Compound.andPredicateWithSubpredicates([self, predicate])
-    end
-
-    def or(predicate)
-      Compound.orPredicateWithSubpredicates([self, predicate])
-    end
-
-    class Comparison < NSComparisonPredicate
-      include Predicate
-    end
-
-    class Compound < NSCompoundPredicate
-      include Predicate
-    end
-
-    class ComparableKeyPathExpression
-      module Mixin
-        def keyPath(keyPath)
-          ComparableKeyPathExpression.new(keyPath)
-        end
-        alias_method :key, :keyPath
+  class Predicate < NSPredicate
+    module Ext
+      def and(predicate)
+        CompoundPredicate.andPredicateWithSubpredicates([self, predicate])
       end
 
-      attr_reader :expression, :comparisonOptions
-
-      def initialize(keyPath)
-        @expression = NSExpression.expressionForKeyPath(keyPath.to_s)
-        @comparisonOptions = 0
+      def or(predicate)
+        CompoundPredicate.orPredicateWithSubpredicates([self, predicate])
       end
+    end
 
-      def caseInsensitive;      @comparisonOptions |= NSCaseInsensitivePredicateOption;      self; end
-      def diacriticInsensitive; @comparisonOptions |= NSDiacriticInsensitivePredicateOption; self; end
-      def localeSensitive;      @comparisonOptions |= NSLocaleSensitivePredicateOption;      self; end
+    include Predicate::Ext
+  end
 
-      def  <(value); comparisonWith(value, type:NSLessThanPredicateOperatorType);             end
-      def  >(value); comparisonWith(value, type:NSGreaterThanPredicateOperatorType);          end
-      def <=(value); comparisonWith(value, type:NSLessThanOrEqualToPredicateOperatorType);    end
-      def >=(value); comparisonWith(value, type:NSGreaterThanOrEqualToPredicateOperatorType); end
-      def !=(value); comparisonWith(value, type:NSNotEqualToPredicateOperatorType);           end
-      def ==(value); comparisonWith(value, type:NSEqualToPredicateOperatorType);              end
+  class ComparisonPredicate < NSComparisonPredicate
+    include Predicate::Ext
+  end
 
-      def between?(min, max);  comparisonWith([min, max], type:NSBetweenPredicateOperatorType);    end
-      def include?(value);     comparisonWith(value,      type:NSContainsPredicateOperatorType);   end
-      def in?(value);          comparisonWith(value,      type:NSInPredicateOperatorType);         end
-      def beginsWith?(string); comparisonWith(string,     type:NSBeginsWithPredicateOperatorType); end
-      def endsWith?(string);   comparisonWith(string,     type:NSEndsWithPredicateOperatorType);   end
+  class CompoundPredicate < NSCompoundPredicate
+    include Predicate::Ext
+  end
 
-      private
-
-      def comparisonWith(value, type:comparisonType)
-        value = NSExpression.expressionForConstantValue(value)
-        Comparison.predicateWithLeftExpression(@expression,
-                               rightExpression:value,
-                                      modifier:NSDirectPredicateModifier,
-                                          type:comparisonType,
-                                       options:@comparisonOptions)
+  class ComparableKeyPathExpression
+    module Mixin
+      def value(keyPath)
+        ComparableKeyPathExpression.new(keyPath)
       end
+    end
+
+    attr_reader :expression, :comparisonOptions
+
+    def initialize(keyPath)
+      @expression = NSExpression.expressionForKeyPath(keyPath.to_s)
+      @comparisonOptions = 0
+    end
+
+    def caseInsensitive;      @comparisonOptions |= NSCaseInsensitivePredicateOption;      self; end
+    def diacriticInsensitive; @comparisonOptions |= NSDiacriticInsensitivePredicateOption; self; end
+    def localeSensitive;      @comparisonOptions |= NSLocaleSensitivePredicateOption;      self; end
+
+    def  <(value); comparisonWith(value, type:NSLessThanPredicateOperatorType);             end
+    def  >(value); comparisonWith(value, type:NSGreaterThanPredicateOperatorType);          end
+    def <=(value); comparisonWith(value, type:NSLessThanOrEqualToPredicateOperatorType);    end
+    def >=(value); comparisonWith(value, type:NSGreaterThanOrEqualToPredicateOperatorType); end
+    def !=(value); comparisonWith(value, type:NSNotEqualToPredicateOperatorType);           end
+    def ==(value); comparisonWith(value, type:NSEqualToPredicateOperatorType);              end
+
+    def between?(min, max);  comparisonWith([min, max], type:NSBetweenPredicateOperatorType);    end
+    def include?(value);     comparisonWith(value,      type:NSContainsPredicateOperatorType);   end
+    def in?(value);          comparisonWith(value,      type:NSInPredicateOperatorType);         end
+    def beginsWith?(string); comparisonWith(string,     type:NSBeginsWithPredicateOperatorType); end
+    def endsWith?(string);   comparisonWith(string,     type:NSEndsWithPredicateOperatorType);   end
+
+    private
+
+    def comparisonWith(value, type:comparisonType)
+      ComparisonPredicate.predicateWithLeftExpression(@expression,
+                                      rightExpression:NSExpression.expressionForConstantValue(value),
+                                             modifier:NSDirectPredicateModifier,
+                                                 type:comparisonType,
+                                              options:@comparisonOptions)
     end
   end
 end
