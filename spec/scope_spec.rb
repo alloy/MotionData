@@ -58,7 +58,7 @@ module MotionData
       scope3.predicate.predicateFormat.should == '(name BEGINSWITH "bob" OR amount > 42) AND enabled == 1'
     end
 
-    it "from a normal NSPredicate" do
+    it "from a NSPredicate" do
       scope1 = Scope.alloc.initWithTarget(Author)
 
       scope2 = scope1.where(NSPredicate.predicateWithFormat('name != %@ OR amount > %@', argumentArray:['bob', 42]))
@@ -101,18 +101,41 @@ module MotionData
 
   describe Scope, "when building a new scope by adding sort conditions" do
     it "sorts by a property" do
-      scope1 = Scope.alloc.initWithTarget(Author)
+      scope1 = Scope.alloc.initWithTarget(Author).sortBy(:name, ascending:true)
+      scope1.sortDescriptors.should == [NSSortDescriptor.alloc.initWithKey('name', ascending:true)]
 
-      scope2 = scope1.sortBy(:name, ascending:true)
-      scope2.object_id.should.not == scope1.object_id
-      scope2.sortDescriptors.should == [NSSortDescriptor.alloc.initWithKey('name', ascending:true)]
-
-      scope3 = scope2.sortBy(:amount, ascending:false)
-      scope3.object_id.should.not == scope2.object_id
-      scope3.sortDescriptors.should == [
+      scope2 = scope1.sortBy(:amount, ascending:false)
+      scope2.sortDescriptors.should == [
         NSSortDescriptor.alloc.initWithKey('name', ascending:true),
         NSSortDescriptor.alloc.initWithKey('amount', ascending:false)
       ]
+    end
+
+    it "sorts by a property and ascending" do
+      scope = Scope.alloc.initWithTarget(Author).sortBy(:name)
+      scope.sortDescriptors.should == [NSSortDescriptor.alloc.initWithKey('name', ascending:true)]
+    end
+
+    it "sorts by a NSSortDescriptor" do
+      sortDescriptor = NSSortDescriptor.alloc.initWithKey('amount', ascending:true)
+      scope = Scope.alloc.initWithTarget(Author).sortBy(sortDescriptor)
+      scope.sortDescriptors.should == [sortDescriptor]
+    end
+
+    it "does not modify the original scope" do
+      scope1 = Scope.alloc.initWithTarget(Author)
+
+      scope2 = scope1.sortBy(:name)
+      scope2.object_id.should.not == scope1.object_id
+      scope2.sortDescriptors.size.should == scope1.sortDescriptors.size + 1
+
+      scope3 = scope2.sortBy(:name, ascending:false)
+      scope3.object_id.should.not == scope2.object_id
+      scope3.sortDescriptors.size.should == scope2.sortDescriptors.size + 1
+
+      scope4 = scope3.sortBy(NSSortDescriptor.alloc.initWithKey('amount', ascending:true))
+      scope4.object_id.should.not == scope3.object_id
+      scope4.sortDescriptors.size.should == scope3.sortDescriptors.size + 1
     end
   end
 

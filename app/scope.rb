@@ -9,7 +9,7 @@ module MotionData
     def initWithTarget(target, predicate:predicate, sortDescriptors:sortDescriptors, inContext:context)
       if init
         @target, @predicate, @context = target, predicate, context
-        @sortDescriptors = sortDescriptors.dup if sortDescriptors
+        @sortDescriptors = sortDescriptors ? sortDescriptors.dup : []
       end
       self
     end
@@ -40,18 +40,17 @@ module MotionData
     end
 
     # Sort ascending by a key-path, or a NSSortDescriptor.
-    def sortBy(property)
-      sortBy(property, ascending:true)
+    def sortBy(keyPathOrSortDescriptor)
+      if keyPathOrSortDescriptor.is_a?(NSSortDescriptor)
+        addSortDescriptor(keyPathOrSortDescriptor)
+      else
+        sortBy(keyPathOrSortDescriptor, ascending:true)
+      end
     end
 
     # Sort by a key-path.
     def sortBy(keyPath, ascending:ascending)
-      sortDescriptors = @sortDescriptors ? @sortDescriptors.dup : []
-      sortDescriptors << NSSortDescriptor.alloc.initWithKey(keyPath.to_s, ascending:ascending)
-      Scope.alloc.initWithTarget(@target,
-                       predicate:@predicate,
-                 sortDescriptors:sortDescriptors,
-                       inContext:@context)
+      addSortDescriptor NSSortDescriptor.alloc.initWithKey(keyPath.to_s, ascending:ascending)
     end
 
     # Factory methods
@@ -72,6 +71,17 @@ module MotionData
                                        managedObjectContext:MotionData::Context.current,
                                          sectionNameKeyPath:options[:sectionNameKeyPath],
                                                   cacheName:options[:cacheName])
+    end
+
+    private
+
+    def addSortDescriptor(sortDescriptor)
+      sortDescriptors = @sortDescriptors.dup
+      sortDescriptors << sortDescriptor
+      Scope.alloc.initWithTarget(@target,
+                       predicate:@predicate,
+                 sortDescriptors:sortDescriptors,
+                       inContext:@context)
     end
 
     #class ToManyRelationship < Scope
