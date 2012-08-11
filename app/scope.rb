@@ -3,13 +3,14 @@ module MotionData
     attr_reader :target, :predicate, :sortDescriptors, :context
 
     def initWithTarget(target)
-      initWithTarget(target, predicate:nil, sortDescriptors:nil, inContext:Context.current)
+      initWithTarget(target, predicate:nil, sortDescriptors:nil, inContext:nil)
     end
 
     def initWithTarget(target, predicate:predicate, sortDescriptors:sortDescriptors, inContext:context)
       if init
-        @target, @predicate, @context = target, predicate, context
-        @sortDescriptors = sortDescriptors ? sortDescriptors.dup : []
+        @target, @predicate = target, predicate
+        @sortDescriptors    = sortDescriptors ? sortDescriptors.dup : []
+        @context            = context || Context.current
       end
       self
     end
@@ -62,7 +63,25 @@ module MotionData
 
     # Executes the request and returns the results as a set.
     def set
-      
+      set = @target
+
+      if @predicate
+        if set.is_a?(NSOrderedSet)
+          # TODO not the most efficient way of doing this when there are also sort descriptors
+          filtered = set.array.filteredArrayUsingPredicate(@predicate)
+          set = NSOrderedSet.orderedSetWithArray(filtered)
+        else
+          set = set.filteredSetUsingPredicate(@predicate)
+        end
+      end
+
+      unless @sortDescriptors.empty?
+        set = set.set if set.is_a?(NSOrderedSet)
+        sorted = set.sortedArrayUsingDescriptors(@sortDescriptors)
+        set = NSOrderedSet.orderedSetWithArray(sorted)
+      end
+
+      set
     end
 
     # Returns a NSFetchedResultsController with this fetch request.

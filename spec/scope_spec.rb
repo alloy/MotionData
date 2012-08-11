@@ -139,4 +139,56 @@ module MotionData
     end
   end
 
+  shared "Scope#set" do
+    extend Predicate::Builder::Mixin
+
+    before do
+      @scope = Scope.alloc.initWithTarget(@set)
+    end
+
+    it "returns the original set when there are no finder or sort conditions" do
+      @scope.set.object_id.should == @set.object_id
+    end
+
+    it "returns a set derived from the original set by applying the finder conditions" do
+      scope = @scope.where(( value(:name) == 'bob' ).or( value(:name) == 'appie' ))
+      scope.set.should == set(@appie, @bob)
+    end
+
+    it "returns an ordered set if sort conditions have been assigned" do
+      @scope.sortBy(:name).set.should == NSOrderedSet.orderedSetWithArray([@alfred, @appie, @bob])
+    end
+  end
+
+  describe Scope, "#set" do
+    before do
+      @appie  = { 'name' => 'appie' }
+      @bob    = { 'name' => 'bob' }
+      @alfred = { 'name' => 'alfred' }
+    end
+
+    describe Scope, "with a unordered set" do
+      def set(*objects)
+        NSSet.setWithArray(objects)
+      end
+
+      before do
+        @set = set(@appie, @bob, @alfred)
+      end
+
+      behaves_like "Scope#set"
+    end
+
+    describe Scope, "with a ordered set" do
+      def set(*objects)
+        NSOrderedSet.orderedSetWithArray(objects)
+      end
+
+      before do
+        @set = set(@appie, @bob, @alfred)
+      end
+
+      behaves_like "Scope#set"
+    end
+  end
 end
