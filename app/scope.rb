@@ -1,9 +1,11 @@
 module MotionData
   class Scope
+    include Predicate::ComparableKeyPathExpression::Mixin
+
     attr_reader :target, :predicate, :sortDescriptors, :context
 
     def initWithTarget(target)
-      initWithTarget(target, predicate:nil, sortDescriptors:nil, inContext:MotionData::Context.current)
+      initWithTarget(target, predicate:nil, sortDescriptors:nil, inContext:Context.current)
     end
 
     def initWithTarget(target, predicate:predicate, sortDescriptors:sortDescriptors, inContext:context)
@@ -19,36 +21,20 @@ module MotionData
     def where(conditions)
       predicate = case conditions
                   when Hash
-                    NSCompoundPredicate.andPredicateWithSubpredicates(conditions.map do |key, value|
-                      lhs = NSExpression.expressionForKeyPath(key)
-                      rhs = NSExpression.expressionForConstantValue(value)
-                      NSComparisonPredicate.predicateWithLeftExpression(lhs,
-                                                        rightExpression:rhs,
-                                                               modifier:NSDirectPredicateModifier,
-                                                                   type:NSEqualToPredicateOperatorType,
-                                                                options:0)
+                    Predicate::Compound.andPredicateWithSubpredicates(conditions.map do |kp, value|
+                      keyPath(kp) == value
                     end)
                   when NSPredicate
                     conditions
                   when Scope
-
+                    conditions.predicate
                   end
 
-      if @predicate
-        predicate = NSCompoundPredicate.andPredicateWithSubpredicates([@predicate, predicate])
-      end
-
+      predicate = @predicate.and(predicate) if @predicate
       Scope.alloc.initWithTarget(@target,
                        predicate:predicate,
                  sortDescriptors:@sortDescriptors,
                        inContext:@context)
-    end
-
-    # Add finder conditions as a hash of requirements, a Scope, or a NSPredicate.
-    #
-    # The conditions are added using `OR`.
-    def or(conditions)
-      
     end
 
     # Sort ascending by an attribute, or a NSSortDescriptor.
@@ -81,12 +67,12 @@ module MotionData
                                                   cacheName:options[:cacheName])
     end
 
-    class ToManyRelationship < FetchRequest
-      # Returns the relationship set, normally provided by a Core Data to-many
-      # relationship.
-      def set
+    #class ToManyRelationship < Scope
+      ## Returns the relationship set, normally provided by a Core Data to-many
+      ## relationship.
+      #def set
         
-      end
-    end
+      #end
+    #end
   end
 end

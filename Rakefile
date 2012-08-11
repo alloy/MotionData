@@ -10,6 +10,7 @@ Motion::Project::App.setup do |app|
     app/context.rb
     app/predicate.rb
     app/managed_object.rb
+    app/scope.rb
 
     app/article.rb
     app/author.rb
