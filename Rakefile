@@ -12,8 +12,7 @@ Motion::Project::App.setup do |app|
     app/managed_object.rb
     app/scope.rb
 
-    app/article.rb
-    app/author.rb
+    app/test_models.rb
     app/app_delegate.rb
   }
   app.frameworks += %w{ CoreData }

@@ -21,6 +21,10 @@ module MotionData
       relationshipDescriptionWithOptions({ :name => name, :maxCount => -1 }.merge(options))
     end
 
+    def klass
+      @klass ||= Object.const_get(name)
+    end
+
     private
 
     def relationshipDescriptionWithOptions(options)
@@ -35,7 +39,7 @@ module MotionData
       # relationship doesn't exist yet, by the time this relationship is
       # defined, if this is the first model that defines a part of this
       # relationship.
-      if inverseName && inverse = rd.destinationEntity.relationshipsByName[inverseName.to_s]
+      if inverseName && inverse = rd.destinationEntity.relationshipsByName[inverseName]
         rd.inverseRelationship = inverse
         inverse.inverseRelationship = rd
         #puts rd.debugDescription
@@ -151,12 +155,13 @@ end
 
     private
 
+    # TODO .select { |p| p.is_a?(AttributeDescription) } is needed because we don't serialize relationships yet
     def entityToRuby(entity)
 %{
   s.entity do |e|
     e.name = '#{entity.name}'
     e.managedObjectClassName = '#{entity.managedObjectClassName}'
-#{entity.properties.map { |p| propertyToRuby(p) }.join("\n")}
+#{entity.properties.select { |p| p.is_a?(AttributeDescription) }.map { |p| propertyToRuby(p) }.join("\n")}
   end
 }
     end

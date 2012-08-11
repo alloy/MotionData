@@ -4,7 +4,7 @@ module MotionData
       attr_accessor :default
 
       def inMemory(schema)
-        store NSInMemoryStoreType
+        store schema, NSInMemoryStoreType
       end
 
       def onDiskStore(schema, path)

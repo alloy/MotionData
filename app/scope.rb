@@ -1,16 +1,17 @@
 module MotionData
   class Scope
-    attr_reader :target, :predicate, :sortDescriptors, :context
+    include Enumerable
+
+    attr_reader :target, :predicate, :sortDescriptors
 
     def initWithTarget(target)
-      initWithTarget(target, predicate:nil, sortDescriptors:nil, inContext:nil)
+      initWithTarget(target, predicate:nil, sortDescriptors:nil)
     end
 
-    def initWithTarget(target, predicate:predicate, sortDescriptors:sortDescriptors, inContext:context)
+    def initWithTarget(target, predicate:predicate, sortDescriptors:sortDescriptors)
       if init
         @target, @predicate = target, predicate
         @sortDescriptors    = sortDescriptors ? sortDescriptors.dup : []
-        @context            = context || Context.current
       end
       self
     end
@@ -34,16 +35,13 @@ module MotionData
                   end
 
       predicate = @predicate.and(predicate) if @predicate
-      Scope.alloc.initWithTarget(@target,
-                       predicate:predicate,
-                 sortDescriptors:@sortDescriptors,
-                       inContext:@context)
+      scopeWithPredicate(predicate)
     end
 
     # Sort ascending by a key-path, or a NSSortDescriptor.
     def sortBy(keyPathOrSortDescriptor)
       if keyPathOrSortDescriptor.is_a?(NSSortDescriptor)
-        addSortDescriptor(keyPathOrSortDescriptor)
+        scopeByAddingSortDescriptor(keyPathOrSortDescriptor)
       else
         sortBy(keyPathOrSortDescriptor, ascending:true)
       end
@@ -51,64 +49,150 @@ module MotionData
 
     # Sort by a key-path.
     def sortBy(keyPath, ascending:ascending)
-      addSortDescriptor NSSortDescriptor.alloc.initWithKey(keyPath.to_s, ascending:ascending)
+      scopeByAddingSortDescriptor(NSSortDescriptor.alloc.initWithKey(keyPath.to_s, ascending:ascending))
     end
 
-    # Factory methods
-
-    # Returns a NSFetchRequest with the current scope.
-    def request
-      
+    # Iterates over the array representation of the scope.
+    def each(&block)
+      array.each(&block)
     end
 
-    # Executes the request and returns the results as a set.
+    # Factory methods that should be implemented by the subclass.
+
+    def array
+      raise "Not implemented"
+    end
+    alias_method :to_a, :array
+
     def set
-      set = @target
-
-      if @predicate
-        if set.is_a?(NSOrderedSet)
-          # TODO not the most efficient way of doing this when there are also sort descriptors
-          filtered = set.array.filteredArrayUsingPredicate(@predicate)
-          set = NSOrderedSet.orderedSetWithArray(filtered)
-        else
-          set = set.filteredSetUsingPredicate(@predicate)
-        end
-      end
-
-      unless @sortDescriptors.empty?
-        set = set.set if set.is_a?(NSOrderedSet)
-        sorted = set.sortedArrayUsingDescriptors(@sortDescriptors)
-        set = NSOrderedSet.orderedSetWithArray(sorted)
-      end
-
-      set
-    end
-
-    # Returns a NSFetchedResultsController with this fetch request.
-    def controller(options = {})
-      NSFetchedResultsController.alloc.initWithFetchRequest(self,
-                                       managedObjectContext:MotionData::Context.current,
-                                         sectionNameKeyPath:options[:sectionNameKeyPath],
-                                                  cacheName:options[:cacheName])
+      raise "Not implemented."
     end
 
     private
 
-    def addSortDescriptor(sortDescriptor)
-      sortDescriptors = @sortDescriptors.dup
-      sortDescriptors << sortDescriptor
-      Scope.alloc.initWithTarget(@target,
-                       predicate:@predicate,
-                 sortDescriptors:sortDescriptors,
-                       inContext:@context)
+    def scopeWithPredicate(predicate)
+      scopeWithPredicate(predicate, sortDescriptors:@sortDescriptors)
     end
 
-    #class ToManyRelationship < Scope
-      ## Returns the relationship set, normally provided by a Core Data to-many
-      ## relationship.
-      #def set
-        
-      #end
-    #end
+    def scopeByAddingSortDescriptor(sortDescriptor)
+      sortDescriptors = @sortDescriptors.dup
+      sortDescriptors << sortDescriptor
+      scopeWithPredicate(@predicate, sortDescriptors:sortDescriptors)
+    end
+
+    def scopeWithPredicate(predicate, sortDescriptors:sortDescriptors)
+      self.class.alloc.initWithTarget(@target, predicate:predicate, sortDescriptors:sortDescriptors)
+    end
+  end
+
+  class Scope
+    class Set < Scope
+      def set
+        setByApplyingConditionsToSet(@target)
+      end
+
+      def array
+        set = self.set
+        set.is_a?(NSOrderedSet) ? set.array : set.allObjects
+      end
+
+      private
+
+      # Applies the finder and sort conditions and returns the result as a set.
+      def setByApplyingConditionsToSet(set)
+        if @predicate
+          if set.is_a?(NSOrderedSet)
+            # TODO not the most efficient way of doing this when there are also sort descriptors
+            filtered = set.array.filteredArrayUsingPredicate(@predicate)
+            set = NSOrderedSet.orderedSetWithArray(filtered)
+          else
+            set = set.filteredSetUsingPredicate(@predicate)
+          end
+        end
+
+        unless @sortDescriptors.empty?
+          set = set.set if set.is_a?(NSOrderedSet)
+          sorted = set.sortedArrayUsingDescriptors(@sortDescriptors)
+          set = NSOrderedSet.orderedSetWithArray(sorted)
+        end
+
+        set
+      end
+    end
+  end
+
+  class Scope
+    class Relationship < Scope::Set
+      attr_accessor :relationshipName, :owner, :ownerClass
+
+      def initWithTarget(target, relationshipName:relationshipName, owner:owner, ownerClass:ownerClass)
+        if initWithTarget(target)
+          @relationshipName, @owner, @ownerClass = relationshipName, owner, ownerClass
+        end
+        self
+      end
+
+      def new(properties = nil)
+        entity = targetClass.newInContext(@owner.managedObjectContext, properties)
+        # Uses the Core Data dynamically generated method to add objects to the relationship.
+        #
+        # E.g. if the relationship is called 'articles', then this will call: addArticles()
+        #
+        # TODO we currently use the one that takes a set instead of just one object, this is
+        #      so we don't yet have to do any singularization
+        camelized = @relationshipName.to_s
+        camelized[0] = camelized[0,1].upcase
+        @owner.send("add#{camelized}", NSSet.setWithObject(entity))
+        entity
+      end
+
+      # Returns a NSFetchRequest with the current scope.
+      def fetchRequest
+        # Start with a predicate which selects those entities that belong to the owner.
+        predicate = Predicate::Builder.new(inverseRelationshipName) == @owner
+        # Then apply the scope's predicate.
+        predicate = predicate.and(@predicate) if @predicate
+
+        request = NSFetchRequest.new
+        request.entity = targetClass.entityDescription
+        request.predicate = predicate
+        request.sortDescriptors = @sortDescriptors unless @sortDescriptors.empty?
+        request
+      end
+
+      # Returns a NSFetchedResultsController with this fetch request.
+      def controller(options = {})
+        NSFetchedResultsController.alloc.initWithFetchRequest(self,
+                                         managedObjectContext:MotionData::Context.current,
+                                           sectionNameKeyPath:options[:sectionNameKeyPath],
+                                                    cacheName:options[:cacheName])
+      end
+
+      private
+
+      def relationshipDescription
+        @ownerClass.entityDescription.relationshipsByName[@relationshipName]
+      end
+
+      def targetEntityDescription
+        relationshipDescription.destinationEntity
+      end
+
+      def targetClass
+        targetEntityDescription.klass
+      end
+
+      def inverseRelationshipName
+        relationshipDescription.inverseRelationship.name
+      end
+
+      def scopeWithPredicate(predicate, sortDescriptors:sortDescriptors)
+        scope = super
+        scope.relationshipName = @relationshipName
+        scope.owner = @owner
+        scope.ownerClass = @ownerClass
+        scope
+      end
+    end
   end
 end

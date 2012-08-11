@@ -8,18 +8,30 @@ class NSSortDescriptor
   end
 end
 
+class TestScope < MotionData::Scope
+  def array
+    @target
+  end
+end
+
 module MotionData
 
   describe Scope do
-    it "initializes with a class target and current context" do
-      scope = Scope.alloc.initWithTarget(Author)
-      scope.target.should == Author
-      scope.context.should == Context.current
+    it "initializes with a target" do
+      target = []
+      scope = TestScope.alloc.initWithTarget(target)
+      scope.target.object_id.should == target.object_id
     end
 
-    it "stores a copy of the given sort descriptors" do
+    it "enumerates over the array version of the scope" do
+      target = [21, 42]
+      scope = TestScope.alloc.initWithTarget(target)
+      scope.map { |object| object }.should == target
+    end
+
+    it "makes a copy of the given sort descriptors" do
       descriptors = [Object.new]
-      scope = Scope.alloc.initWithTarget(Author, predicate:nil, sortDescriptors:descriptors, inContext:nil)
+      scope = TestScope.alloc.initWithTarget([], predicate:nil, sortDescriptors:descriptors)
       scope.sortDescriptors.should == descriptors
       scope.sortDescriptors.object_id.should.not == descriptors.object_id
     end
@@ -139,11 +151,11 @@ module MotionData
     end
   end
 
-  shared "Scope#set" do
+  shared "Scope::Set#set" do
     extend Predicate::Builder::Mixin
 
     before do
-      @scope = Scope.alloc.initWithTarget(@set)
+      @scope = Scope::Set.alloc.initWithTarget(@set)
     end
 
     it "returns the original set when there are no finder or sort conditions" do
@@ -158,16 +170,21 @@ module MotionData
     it "returns an ordered set if sort conditions have been assigned" do
       @scope.sortBy(:name).set.should == NSOrderedSet.orderedSetWithArray([@alfred, @appie, @bob])
     end
+
+    it "returns an array representation" do
+      scope = @scope.where(( value(:name) == 'bob' ).or( value(:name) == 'appie' ))
+      scope.sortBy(:name).map { |object| object }.should == [@appie, @bob]
+    end
   end
 
-  describe Scope, "#set" do
+  describe Scope::Set, "#set" do
     before do
       @appie  = { 'name' => 'appie' }
       @bob    = { 'name' => 'bob' }
       @alfred = { 'name' => 'alfred' }
     end
 
-    describe Scope, "with a unordered set" do
+    describe "with a unordered set" do
       def set(*objects)
         NSSet.setWithArray(objects)
       end
@@ -176,10 +193,10 @@ module MotionData
         @set = set(@appie, @bob, @alfred)
       end
 
-      behaves_like "Scope#set"
+      behaves_like "Scope::Set#set"
     end
 
-    describe Scope, "with a ordered set" do
+    describe "with a ordered set" do
       def set(*objects)
         NSOrderedSet.orderedSetWithArray(objects)
       end
@@ -188,7 +205,60 @@ module MotionData
         @set = set(@appie, @bob, @alfred)
       end
 
-      behaves_like "Scope#set"
+      behaves_like "Scope::Set#set"
+    end
+  end
+
+  describe Scope::Relationship do
+    before do
+      MotionData.setupCoreDataStackWithInMemoryStore
+
+      @context = Context.context
+      @context.perform do
+        @author = Author.new(:name => 'Edgar Allan Poe')
+        Article.new(:author => @author, :title => 'article1', :published => true)
+        Article.new(:author => @author, :title => 'article2')
+        Article.new(:author => @author, :title => 'article3', :published => true)
+      end
+
+      @articles = Scope::Relationship.alloc.initWithTarget(@author.primitiveValueForKey('articles'),
+                                          relationshipName: :articles,
+                                                     owner:@author,
+                                                ownerClass:Author)
+    end
+
+    it "wraps a Core Data relationship set" do
+      @articles.set.should == @author.primitiveValueForKey('articles')
+
+      scope = @articles.where(:published => true).sortBy(:title)
+      scope.map(&:title).should == %w{ article1 article3 }
+    end
+
+    it "inserts a new instance of the destination entity in the owner's context and associates it to the owner" do
+      article = @articles.new(:title => 'article4', :published => true)
+      article.author.should == @author
+      article.managedObjectContext.should == @context
+
+      scope = @articles.where(:published => true).sortBy(:title)
+      scope.map(&:title).should == %w{ article1 article3 article4 }
+    end
+
+    it "returns a NSFetchRequest that represents the scope" do
+      request = @articles.fetchRequest
+      request.entity.should == Article.entityDescription
+      request.sortDescriptors.should == nil
+
+      format = request.predicate.predicateFormat
+      format.should == NSPredicate.predicateWithFormat('author == %@', argumentArray:[@author]).predicateFormat
+
+      scope = @articles.where(:published => true).sortBy(:title)
+      request = scope.fetchRequest
+      request.entity.should == Article.entityDescription
+      request.sortDescriptors.should == scope.sortDescriptors
+
+      predicate = NSPredicate.predicateWithFormat('author == %@', argumentArray:[@author])
+      predicate = predicate.and(scope.predicate)
+      request.predicate.predicateFormat.should == predicate.predicateFormat
     end
   end
 end
