@@ -21,7 +21,7 @@ module MotionData
       predicate = case conditions
                   when Hash
                     NSCompoundPredicate.andPredicateWithSubpredicates(conditions.map do |keyPath, value|
-                      ComparableKeyPathExpression.new(keyPath) == value
+                      Predicate::Builder.new(keyPath) == value
                     end)
                   when Scope
                     conditions.predicate

@@ -9,7 +9,7 @@ module MotionData
   end
 
   describe Scope, "when building a new scope by applying finder options" do
-    extend ComparableKeyPathExpression::Mixin
+    extend Predicate::Builder::Mixin
 
     it "from a hash" do
       scope1 = Scope.alloc.initWithTarget(Author)

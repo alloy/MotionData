@@ -1,11 +1,11 @@
 module MotionData
 
-  describe ComparableKeyPathExpression do
-    extend ComparableKeyPathExpression::Mixin
+  describe Predicate::Builder do
+    extend Predicate::Builder::Mixin
 
     it "returns a expression for the left-hand side of a comparison" do
-      value(:property).expression.keyPath.should == 'property'
-      value('property.subproperty').expression.keyPath.should == 'property.subproperty'
+      value(:property).leftExpression.keyPath.should == 'property'
+      value('property.subproperty').leftExpression.keyPath.should == 'property.subproperty'
     end
 
     it "returns comparison predicates" do
@@ -36,21 +36,21 @@ module MotionData
     end
 
     it "adds the option to perform a case-insensitive comparison" do
-      expression = value(:name)
-      expression.caseInsensitive.object_id.should == expression.object_id
-      expression.comparisonOptions.should == NSCaseInsensitivePredicateOption
+      builder = value(:name)
+      builder.caseInsensitive.object_id.should == builder.object_id
+      builder.comparisonOptions.should == NSCaseInsensitivePredicateOption
     end
 
     it "adds the option to perform a diacritic-insensitive comparison" do
-      expression = value(:name)
-      expression.diacriticInsensitive.object_id.should == expression.object_id
-      expression.comparisonOptions.should == NSDiacriticInsensitivePredicateOption
+      builder = value(:name)
+      builder.diacriticInsensitive.object_id.should == builder.object_id
+      builder.comparisonOptions.should == NSDiacriticInsensitivePredicateOption
     end
 
     it "adds the option to perform a locale-sensitive comparison" do
-      expression = value(:name)
-      expression.localeSensitive.object_id.should == expression.object_id
-      expression.comparisonOptions.should == NSLocaleSensitivePredicateOption
+      builder = value(:name)
+      builder.localeSensitive.object_id.should == builder.object_id
+      builder.comparisonOptions.should == NSLocaleSensitivePredicateOption
     end
 
     it "combines comparison options" do
@@ -66,8 +66,8 @@ module MotionData
     end
   end
 
-  describe NSPredicate do
-    extend ComparableKeyPathExpression::Mixin
+  describe Predicate do
+    extend Predicate::Builder::Mixin
 
     it "returns a compound `AND` predicate" do
       predicate = ( value(:amount) < 42 ).and( value(:amount) > 42 ).and( value(:amount) != 21 )
