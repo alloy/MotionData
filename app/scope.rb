@@ -160,14 +160,6 @@ module MotionData
         request
       end
 
-      # Returns a NSFetchedResultsController with this fetch request.
-      def controller(options = {})
-        NSFetchedResultsController.alloc.initWithFetchRequest(self,
-                                         managedObjectContext:MotionData::Context.current,
-                                           sectionNameKeyPath:options[:sectionNameKeyPath],
-                                                    cacheName:options[:cacheName])
-      end
-
       private
 
       def relationshipDescription
