@@ -62,7 +62,13 @@ module MotionData
     def array
       raise "Not implemented"
     end
-    alias_method :to_a, :array
+
+    # TODO RM bug? aliased methods in subclasses don't call overriden version of aliased method.
+    #alias_method :to_a, :array
+
+    def to_a
+      array
+    end
 
     def set
       raise "Not implemented."

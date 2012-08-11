@@ -36,11 +36,17 @@ module MotionData
       end
     end
 
-    describe "finders" do
+    describe "scopes" do
       it "returns all entities of a managed object in the current context" do
-        Author.all.should == []
+        Author.all.to_a.should == []
         Author.new(:name => "Edgar Allan Poe")
         Author.all.map(&:name).should == ["Edgar Allan Poe"]
+      end
+
+      it "defines a named scope" do
+        Author.scope(:edgars, Author.where(:name => 'edgar'))
+        Author.edgars.target.should == Author
+        Author.edgars.predicate.predicateFormat.should == 'name == "edgar"'
       end
     end
   end

@@ -53,18 +53,34 @@ module MotionData
       # Finders
 
       def all
-        scope = NSFetchRequest.new
-        scope.entity = entityDescription
-        # Encueing the fetch like this ensures other transactions on the context
-        # have been run.
-        #
-        # This is what MagicalRecord does too.
-        Context.current.perform do
-          Context.current.executeFetchRequest(scope, error:nil)
-          # TODO handleError(error) unless results
-        end
+        Scope::Model.alloc.initWithTarget(self)
       end
 
+      def where(conditions)
+        all.where(conditions)
+      end
+
+      # TODO copy to subclasses of abstract models
+      def scopes
+        @scopes ||= {}
+      end
+
+      # Adds a named scope to the class.
+      def scope(name, scope)
+        scopes[name] = scope
+      end
+
+      # Returns a scope that matches the method name if one exists.
+      #
+      # TODO Until RubyMotion allows the use of define_method, this is the best
+      # we can do.
+      def method_missing(method, *args, &block)
+        if scope = scopes[method]
+          scope
+        else
+          super
+        end
+      end
     end
 
     def writeAttribute(key, value)
