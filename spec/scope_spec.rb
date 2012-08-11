@@ -261,4 +261,47 @@ module MotionData
       request.predicate.predicateFormat.should == predicate.predicateFormat
     end
   end
+
+  describe Scope::Model do
+    before do
+      MotionData.setupCoreDataStackWithInMemoryStore
+
+      Article.new(:title => 'article1', :published => true)
+      @unpublishedArticle = Article.new(:title => 'article2', :published => false)
+      Article.new(:title => 'article3', :published => true)
+    end
+
+    it "returns a NSFetchRequest that represents the scope" do
+      scope = Scope::Model.alloc.initWithTarget(Article)
+
+      request = scope.fetchRequest
+      request.entity.should == Article.entityDescription
+      request.sortDescriptors.should == nil
+      request.predicate.should == nil
+
+      scope = scope.where(:published => true).sortBy(:title)
+      request = scope.fetchRequest
+      request.entity.should == Article.entityDescription
+      request.sortDescriptors.should == scope.sortDescriptors
+      request.predicate.predicateFormat.should == scope.predicate.predicateFormat
+    end
+
+    it "returns objects of the target class" do
+      scope = Scope::Model.alloc.initWithTarget(Article)
+      scope = scope.where(:published => true).sortBy(:title)
+      scope.map(&:title).should == %w{ article1 article3 }
+    end
+
+    it "returns an unordered set representation of the scope when there are no sort descriptors" do
+      scope = Scope::Model.alloc.initWithTarget(Article)
+      scope = scope.where(:published => false)
+      scope.set.should == NSSet.setWithObject(@unpublishedArticle)
+    end
+
+    it "returns an ordered set representation of the scope when there are sort descriptors" do
+      scope = Scope::Model.alloc.initWithTarget(Article)
+      scope = scope.where(:published => false).sortBy(:title)
+      scope.set.should == NSOrderedSet.orderedSetWithObject(@unpublishedArticle)
+    end
+  end
 end

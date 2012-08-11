@@ -187,4 +187,29 @@ module MotionData
       end
     end
   end
+
+  class Scope
+    class Model < Scope
+      def set
+        @sortDescriptors.empty? ? NSSet.setWithArray(array) : NSOrderedSet.orderedSetWithArray(array)
+      end
+
+      def array
+        error = Pointer.new(:object)
+        result = Context.current.executeFetchRequest(fetchRequest, error:error)
+        if error[0]
+          raise "Error while fetching: #{error[0].debugDescription}"
+        end
+        result
+      end
+
+      def fetchRequest
+        request = NSFetchRequest.new
+        request.entity = @target.entityDescription
+        request.predicate = @predicate
+        request.sortDescriptors = @sortDescriptors unless @sortDescriptors.empty?
+        request
+      end
+    end
+  end
 end
