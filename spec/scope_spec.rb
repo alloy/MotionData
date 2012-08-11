@@ -1,3 +1,13 @@
+class NSSortDescriptor
+  def inspect
+    description
+  end
+
+  def ==(other)
+    description == other.description
+  end
+end
+
 module MotionData
 
   describe Scope do
@@ -6,9 +16,13 @@ module MotionData
       scope.target.should == Author
       scope.context.should == Context.current
     end
+
+    it "stores a copy of the given sort descriptors" do
+      
+    end
   end
 
-  describe Scope, "when building a new scope by applying finder options" do
+  describe Scope, "when building a new scope by adding finder conditions" do
     extend Predicate::Builder::Mixin
 
     it "from a hash" do
@@ -79,6 +93,25 @@ module MotionData
       scope5 = scope4.where(NSPredicate.predicateWithFormat('name == "bob"'))
       scope5.object_id.should.not == scope4.object_id
       scope5.predicate.object_id.should.not == scope4.predicate.object_id
+    end
+  end
+
+  describe Scope, "when building a new scope by adding sort conditions" do
+    extend Predicate::Builder::Mixin
+
+    it "sorts by a property" do
+      scope1 = Scope.alloc.initWithTarget(Author)
+
+      scope2 = scope1.sortBy(:name, ascending:true)
+      scope2.object_id.should.not == scope1.object_id
+      scope2.sortDescriptors.should == [NSSortDescriptor.alloc.initWithKey('name', ascending:true)]
+
+      scope3 = scope2.sortBy(:amount, ascending:false)
+      scope3.object_id.should.not == scope2.object_id
+      scope3.sortDescriptors.should == [
+        NSSortDescriptor.alloc.initWithKey('name', ascending:true),
+        NSSortDescriptor.alloc.initWithKey('amount', ascending:false)
+      ]
     end
   end
 

@@ -38,14 +38,19 @@ module MotionData
                        inContext:@context)
     end
 
-    # Sort ascending by an attribute, or a NSSortDescriptor.
-    def sortBy(attribute)
-      sortBy(attribute, ascending:true)
+    # Sort ascending by a key-path, or a NSSortDescriptor.
+    def sortBy(property)
+      sortBy(property, ascending:true)
     end
 
-    # Sort by an attribute.
-    def sortBy(attribute, ascending:ascending)
-      
+    # Sort by a key-path.
+    def sortBy(keyPath, ascending:ascending)
+      sortDescriptors = @sortDescriptors ? @sortDescriptors.dup : []
+      sortDescriptors << NSSortDescriptor.alloc.initWithKey(keyPath.to_s, ascending:ascending)
+      Scope.alloc.initWithTarget(@target,
+                       predicate:@predicate,
+                 sortDescriptors:sortDescriptors,
+                       inContext:@context)
     end
 
     # Factory methods
