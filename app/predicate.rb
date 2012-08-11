@@ -26,12 +26,15 @@ module MotionData
       end
     end
 
-    attr_reader :expression, :comparisonOptions
+    attr_reader :expression, :comparisonOptions, :negate
 
     def initialize(keyPath)
       @expression = NSExpression.expressionForKeyPath(keyPath.to_s)
       @comparisonOptions = 0
+      @negate = false
     end
+
+    def not; @negate = true; self; end
 
     def caseInsensitive;      @comparisonOptions |= NSCaseInsensitivePredicateOption;      self; end
     def diacriticInsensitive; @comparisonOptions |= NSDiacriticInsensitivePredicateOption; self; end
@@ -53,11 +56,12 @@ module MotionData
     private
 
     def comparisonWith(value, type:comparisonType)
-      NSComparisonPredicate.predicateWithLeftExpression(@expression,
-                                        rightExpression:NSExpression.expressionForConstantValue(value),
-                                               modifier:NSDirectPredicateModifier,
-                                                   type:comparisonType,
-                                                options:@comparisonOptions)
+      predicate = NSComparisonPredicate.predicateWithLeftExpression(@expression,
+                                                    rightExpression:NSExpression.expressionForConstantValue(value),
+                                                           modifier:NSDirectPredicateModifier,
+                                                               type:comparisonType,
+                                                            options:@comparisonOptions)
+      @negate ? NSCompoundPredicate.notPredicateWithSubpredicate(predicate) : predicate
     end
   end
 end

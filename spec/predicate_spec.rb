@@ -1,11 +1,11 @@
 module MotionData
 
-  describe ComparablevaluePathExpression do
-    extend ComparablevaluePathExpression::Mixin
+  describe ComparableKeyPathExpression do
+    extend ComparableKeyPathExpression::Mixin
 
     it "returns a expression for the left-hand side of a comparison" do
-      value(:property).expression.valuePath.should == 'property'
-      valuePath('property.subproperty').expression.valuePath.should == 'property.subproperty'
+      value(:property).expression.keyPath.should == 'property'
+      value('property.subproperty').expression.keyPath.should == 'property.subproperty'
     end
 
     it "returns comparison predicates" do
@@ -16,39 +16,19 @@ module MotionData
         (value(:amount) >= 42) => 'amount >= 42',
         (value(:amount) != 42) => 'amount != 42',
         (value(:amount) == 42) => 'amount == 42',
+
+        value(:amount).between?(21, 42) => 'amount BETWEEN {21, 42}',
+        value(:amount).in?([21, 42])    => 'amount IN {21, 42}',
+        value(:amount).include?(42)     => 'amount CONTAINS 42',
+        value(:name).beginsWith?('bob') => 'name BEGINSWITH "bob"',
+        value(:name).endsWith?('bob')   => 'name ENDSWITH "bob"',
       }.each do |predicate, format|
         predicate.predicateFormat.should == format
       end
     end
 
-    it "returns a `between` predicate" do
-      predicate = value(:amount).between?(21, 42)
-      predicate.predicateFormat.should == 'amount BETWEEN {21, 42}'
-    end
-
-    it "returns a `in` predicate" do
-      predicate = value(:amount).in?([21, 42])
-      predicate.predicateFormat.should == 'amount IN {21, 42}'
-    end
-
-    it "returns a `contains` predicate" do
-      predicate = value(:amount).include?(42)
-      predicate.predicateFormat.should == 'amount CONTAINS 42'
-    end
-
-    it "returns a `in collection` predicate" do
-      predicate = value(:amount).in?([21, 42])
-      predicate.predicateFormat.should == 'amount IN {21, 42}'
-    end
-
-    it "returns a `begin's with` predicate" do
-      predicate = value(:name).beginsWith?('bob')
-      predicate.predicateFormat.should == 'name BEGINSWITH "bob"'
-    end
-
-    it "returns a `end's with` predicate" do
-      predicate = value(:name).endsWith?('bob')
-      predicate.predicateFormat.should == 'name ENDSWITH "bob"'
+    it "negates the comparison predicate" do
+      value(:name).not.beginsWith?('bob').predicateFormat.should == 'NOT name BEGINSWITH "bob"'
     end
 
     it "by default returns that no comparison options should be used" do
@@ -86,8 +66,8 @@ module MotionData
     end
   end
 
-  describe Predicate do
-    extend ComparablevaluePathExpression::Mixin
+  describe NSPredicate do
+    extend ComparableKeyPathExpression::Mixin
 
     it "returns a compound `AND` predicate" do
       predicate = ( value(:amount) < 42 ).and( value(:amount) > 42 ).and( value(:amount) != 21 )
