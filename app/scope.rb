@@ -4,6 +4,10 @@ module MotionData
 
     attr_reader :target, :predicate, :sortDescriptors
 
+    def self.new
+      alloc.initWithTarget(nil)
+    end
+
     def initWithTarget(target)
       initWithTarget(target, predicate:nil, sortDescriptors:nil)
     end

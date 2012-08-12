@@ -35,13 +35,18 @@ module MotionData
       scope.sortDescriptors.should == descriptors
       scope.sortDescriptors.object_id.should.not == descriptors.object_id
     end
+
+    it "assigns the same target to a child scope" do
+      scope = Scope.alloc.initWithTarget(Object.new)
+      scope.where(:name => 'bob').target.should == scope.target
+    end
   end
 
   describe Scope, "when building a new scope by adding finder conditions" do
     extend Predicate::Builder::Mixin
 
     it "from a hash" do
-      scope1 = Scope.alloc.initWithTarget(Author)
+      scope1 = Scope.new
 
       scope2 = scope1.where(:name => 'bob', :amount => 42)
       scope2.predicate.predicateFormat.should == 'name == "bob" AND amount == 42'
@@ -51,7 +56,7 @@ module MotionData
     end
 
     it "from a scope" do
-      scope1 = Scope.alloc.initWithTarget(Author)
+      scope1 = Scope.new
 
       scope2 = scope1.where(( value(:name).caseInsensitive != 'bob' ).or( value(:amount) > 42 )).sortBy(:name)
       scope3 = scope1.where(( value(:enabled) == true ).and( value('job.title') != nil )).sortBy(:amount, ascending:false)
@@ -65,7 +70,7 @@ module MotionData
     end
 
     it "from a NSPredicate" do
-      scope1 = Scope.alloc.initWithTarget(Author)
+      scope1 = Scope.new
 
       scope2 = scope1.where(NSPredicate.predicateWithFormat('name != %@ OR amount > %@', argumentArray:['bob', 42]))
       scope2.predicate.predicateFormat.should == 'name != "bob" OR amount > 42'
@@ -75,7 +80,7 @@ module MotionData
     end
 
     it "from a predicate string" do
-      scope1 = Scope.alloc.initWithTarget(Author)
+      scope1 = Scope.new
 
       scope2 = scope1.where('name != %@ OR amount > %@', 'bob', 42)
       scope2.predicate.predicateFormat.should == 'name != "bob" OR amount > 42'
@@ -85,7 +90,7 @@ module MotionData
     end
 
     it "does not modify the original scopes" do
-      scope1 = Scope.alloc.initWithTarget(Author)
+      scope1 = Scope.new
 
       scope2 = scope1.where(:name => 'bob')
       scope2.object_id.should.not == scope1.object_id
@@ -107,7 +112,7 @@ module MotionData
 
   describe Scope, "when building a new scope by adding sort conditions" do
     it "sorts by a property" do
-      scope1 = Scope.alloc.initWithTarget(Author).sortBy(:name, ascending:true)
+      scope1 = Scope.new.sortBy(:name, ascending:true)
       scope1.sortDescriptors.should == [NSSortDescriptor.alloc.initWithKey('name', ascending:true)]
 
       scope2 = scope1.sortBy(:amount, ascending:false)
@@ -118,18 +123,18 @@ module MotionData
     end
 
     it "sorts by a property and ascending" do
-      scope = Scope.alloc.initWithTarget(Author).sortBy(:name)
+      scope = Scope.new.sortBy(:name)
       scope.sortDescriptors.should == [NSSortDescriptor.alloc.initWithKey('name', ascending:true)]
     end
 
     it "sorts by a NSSortDescriptor" do
       sortDescriptor = NSSortDescriptor.alloc.initWithKey('amount', ascending:true)
-      scope = Scope.alloc.initWithTarget(Author).sortBy(sortDescriptor)
+      scope = Scope.new.sortBy(sortDescriptor)
       scope.sortDescriptors.should == [sortDescriptor]
     end
 
     it "does not modify the original scope" do
-      scope1 = Scope.alloc.initWithTarget(Author)
+      scope1 = Scope.new
 
       scope2 = scope1.sortBy(:name)
       scope2.object_id.should.not == scope1.object_id
