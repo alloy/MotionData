@@ -16,6 +16,8 @@ Motion::Project::App.setup do |app|
     app/app_delegate.rb
   }
   app.frameworks += %w{ CoreData }
+
+  app.vendor_project('ext', :static)
 end
 
 task 'spec' do

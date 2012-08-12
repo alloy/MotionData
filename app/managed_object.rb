@@ -1,3 +1,23 @@
+class Class
+  def defineClassMethod(name, &block)
+    # This is really only needed if/when we need to eval it in the context of
+    # the instance. Until then we'll optimize by simply using the block as
+    # passed by the caller and let the code there deal with it.
+    #
+    #ClassExt.defineRubyClassMethod(lambda { |_self| _self.instance_eval(&block) }, withSelector:name, onClass:self)
+    ClassExt.defineRubyClassMethod(block, withSelector:name, onClass:self)
+  end
+
+  def defineInstanceMethod(name, &block)
+    # This is really only needed if/when we need to eval it in the context of
+    # the instance. Until then we'll optimize by simply using the block as
+    # passed by the caller and let the code there deal with it.
+    #
+    #ClassExt.defineRubyInstanceMethod(lambda { |_self| _self.instance_eval(&block) }, withSelector:name, onClass:self)
+    ClassExt.defineRubyInstanceMethod(block, withSelector:name, onClass:self)
+  end
+end
+
 module MotionData
 
   module CoreTypes
@@ -47,6 +67,12 @@ module MotionData
       def hasMany(name, options = {})
         #puts "#{self.name} has many `#{name}' (#{options.inspect})"
         entityDescription.hasMany(name, options)
+        klass = self
+        defineInstanceMethod(name) do |_self|
+          # TODO will/did access
+          set = _self.primitiveValueForKey(name.to_s)
+          Scope::Relationship.alloc.initWithTarget(set, relationshipName:name, owner:_self, ownerClass:klass)
+        end
       end
 
       def property(name, type, options = {})
@@ -68,21 +94,11 @@ module MotionData
         @scopes ||= {}
       end
 
-      # Adds a named scope to the class.
+      # Adds a named scope to the class and makes it available as a class
+      # method named after the scope.
       def scope(name, scope)
         scopes[name] = scope
-      end
-
-      # Returns a scope that matches the method name if one exists.
-      #
-      # TODO Until RubyMotion allows the use of define_method, this is the best
-      # we can do.
-      def method_missing(method, *args, &block)
-        if scope = scopes[method]
-          scope
-        else
-          super
-        end
+        defineClassMethod(name) { |_self| scope }
       end
     end
 

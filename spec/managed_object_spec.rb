@@ -51,14 +51,14 @@ module MotionData
 
       it "returns a Scope::Relationship instead of the normal Core Data set" do
         author = Author.new
-        author.relationship(:articles).should.be.instance_of Scope::Relationship
-        author.relationship(:articles).owner.should == author
-        author.relationship(:articles).ownerClass.should == Author
-        author.relationship(:articles).to_a.should == []
+        author.articles.should.be.instance_of Scope::Relationship
+        author.articles.owner.should == author
+        author.articles.ownerClass.should == Author
+        author.articles.to_a.should == []
 
-        article1 = author.relationship(:articles).new(:title => 'article1')
-        article2 = author.relationship(:articles).new(:title => 'article2')
-        author.relationship(:articles).withTitles.to_a.should == [article1, article2]
+        #article1 = author.articles.new(:title => 'article1')
+        #article2 = author.articles.new(:title => 'article2')
+        #author.articles.withTitles.to_a.should == [article1, article2]
       end
     end
   end
