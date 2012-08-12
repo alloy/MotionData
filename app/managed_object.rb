@@ -35,7 +35,7 @@ module MotionData
 
       def entityDescription
         @entityDescription ||= EntityDescription.new.tap do |ed|
-          ed.name = ed.managedObjectClassName = self.name
+          ed.name = ed.managedObjectClassName = name
         end
       end
 
@@ -86,13 +86,16 @@ module MotionData
       end
     end
 
+    def relationship(name)
+      Scope::Relationship.alloc.initWithTarget(send(name), relationshipName:name, owner:self, ownerClass:self.class.entityDescription.klass)
+    end
+
     def writeAttribute(key, value)
       key = key.to_s
       willChangeValueForKey(key)
       setPrimitiveValue(value, forKey:key)
       didChangeValueForKey(key)
     end
-
   end
 
 end
