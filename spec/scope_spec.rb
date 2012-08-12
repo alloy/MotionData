@@ -53,21 +53,15 @@ module MotionData
     it "from a scope" do
       scope1 = Scope.alloc.initWithTarget(Author)
 
-      scope2 = scope1.where(( value(:name).caseInsensitive != 'bob' ).or( value(:amount) > 42 ))
-      scope3 = scope1.where(( value(:enabled) == true ).and( value('job.title') != nil ))
+      scope2 = scope1.where(( value(:name).caseInsensitive != 'bob' ).or( value(:amount) > 42 )).sortBy(:name)
+      scope3 = scope1.where(( value(:enabled) == true ).and( value('job.title') != nil )).sortBy(:amount, ascending:false)
 
       scope4 = scope3.where(scope2)
       scope4.predicate.predicateFormat.should == '(enabled == 1 AND job.title != nil) AND (name !=[c] "bob" OR amount > 42)'
-    end
-
-    it "from a MotionData type predicate" do
-      scope1 = Scope.alloc.initWithTarget(Author)
-
-      scope2 = scope1.where( value(:name).beginsWith?('bob').or( value(:amount) > 42 ))
-      scope2.predicate.predicateFormat.should == 'name BEGINSWITH "bob" OR amount > 42'
-
-      scope3 = scope2.where( value(:enabled) == true )
-      scope3.predicate.predicateFormat.should == '(name BEGINSWITH "bob" OR amount > 42) AND enabled == 1'
+      scope4.sortDescriptors.should == [
+        NSSortDescriptor.alloc.initWithKey('amount', ascending:false),
+        NSSortDescriptor.alloc.initWithKey('name', ascending:true)
+      ]
     end
 
     it "from a NSPredicate" do
@@ -260,6 +254,18 @@ module MotionData
       predicate = predicate.and(scope.predicate)
       request.predicate.predicateFormat.should == predicate.predicateFormat
     end
+
+    it "is able to use named scopes of the target model class" do
+      @articles.published.should.be.instance_of Scope::Relationship
+      @articles.published.target.should == @articles.target
+      @articles.published.sortDescriptors.should == []
+      @articles.published.predicate.predicateFormat.should == 'published == 1'
+
+      @articles.published.withTitle.should.be.instance_of Scope::Relationship
+      @articles.published.withTitle.target.should == @articles.target
+      @articles.published.withTitle.sortDescriptors.should == [NSSortDescriptor.alloc.initWithKey('title', ascending:false)]
+      @articles.published.withTitle.predicate.predicateFormat.should == '(published == 1) AND title != nil'
+    end
   end
 
   describe Scope::Model do
@@ -302,6 +308,20 @@ module MotionData
       scope = Scope::Model.alloc.initWithTarget(Article)
       scope = scope.where(:published => false).sortBy(:title)
       scope.set.should == NSOrderedSet.orderedSetWithObject(@unpublishedArticle)
+    end
+
+    it "is able to use named scopes of the target model class" do
+      scope = Scope::Model.alloc.initWithTarget(Article)
+
+      scope.published.should.be.instance_of Scope::Model
+      scope.published.target.should == Article
+      scope.published.sortDescriptors.should == []
+      scope.published.predicate.predicateFormat.should == 'published == 1'
+
+      scope.published.withTitle.should.be.instance_of Scope::Model
+      scope.published.withTitle.target.should == Article
+      scope.published.withTitle.sortDescriptors.should == [NSSortDescriptor.alloc.initWithKey('title', ascending:false)]
+      scope.published.withTitle.predicate.predicateFormat.should == '(published == 1) AND title != nil'
     end
   end
 end

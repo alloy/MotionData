@@ -16,4 +16,7 @@ class Article
   property :title,     String,  :required => true
   property :body,      String,  :required => true
   property :published, Boolean, :default  => false
+
+  scope :published, where(:published => true)
+  scope :withTitle, where( value(:title) != nil ).sortBy(:title, ascending:false)
 end

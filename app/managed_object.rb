@@ -14,6 +14,9 @@ module MotionData
   class ManagedObject < NSManagedObject
     include CoreTypes
 
+    extend Predicate::Builder::Mixin
+    include Predicate::Builder::Mixin
+
     class << self
 
       def new(properties = nil)

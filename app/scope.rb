@@ -21,21 +21,26 @@ module MotionData
     #
     # The conditions are added using `AND`.
     def where(conditions, *formatArguments)
-      predicate = case conditions
-                  when Hash
-                    NSCompoundPredicate.andPredicateWithSubpredicates(conditions.map do |keyPath, value|
-                      Predicate::Builder.new(keyPath) == value
-                    end)
-                  when Scope
-                    conditions.predicate
-                  when NSPredicate
-                    conditions
-                  when String
-                    NSPredicate.predicateWithFormat(conditions, argumentArray:formatArguments)
-                  end
+      sortDescriptors = @sortDescriptors
+
+      case conditions
+      when Hash
+        predicate = NSCompoundPredicate.andPredicateWithSubpredicates(conditions.map do |keyPath, value|
+          Predicate::Builder.new(keyPath) == value
+        end)
+      when Scope
+        sortDescriptors = sortDescriptorsByAddingSortDescriptors(*conditions.sortDescriptors)
+        predicate = conditions.predicate
+      when NSPredicate
+        predicate = conditions
+      when String
+        predicate = NSPredicate.predicateWithFormat(conditions, argumentArray:formatArguments)
+      else
+        raise ArgumentError, "unsupported where conditions class `#{conditions.class}'"
+      end
 
       predicate = @predicate.and(predicate) if @predicate
-      scopeWithPredicate(predicate)
+      scopeWithPredicate(predicate, sortDescriptors:sortDescriptors)
     end
 
     # Sort ascending by a key-path, or a NSSortDescriptor.
@@ -76,18 +81,19 @@ module MotionData
 
     private
 
-    def scopeWithPredicate(predicate)
-      scopeWithPredicate(predicate, sortDescriptors:@sortDescriptors)
+    def scopeWithPredicate(predicate, sortDescriptors:sortDescriptors)
+      self.class.alloc.initWithTarget(@target, predicate:predicate, sortDescriptors:sortDescriptors)
+    end
+
+    def sortDescriptorsByAddingSortDescriptors(*sortDescriptors)
+      descriptors = @sortDescriptors.dup
+      descriptors.concat(sortDescriptors)
+      descriptors
     end
 
     def scopeByAddingSortDescriptor(sortDescriptor)
-      sortDescriptors = @sortDescriptors.dup
-      sortDescriptors << sortDescriptor
-      scopeWithPredicate(@predicate, sortDescriptors:sortDescriptors)
-    end
-
-    def scopeWithPredicate(predicate, sortDescriptors:sortDescriptors)
-      self.class.alloc.initWithTarget(@target, predicate:predicate, sortDescriptors:sortDescriptors)
+      descriptors = sortDescriptorsByAddingSortDescriptors(sortDescriptor)
+      scopeWithPredicate(@predicate, sortDescriptors:descriptors)
     end
   end
 
@@ -166,6 +172,14 @@ module MotionData
         request
       end
 
+      def method_missing(method, *args, &block)
+        if scope = targetClass.scopes[method]
+          where(scope)
+        else
+          super
+        end
+      end
+
       private
 
       def relationshipDescription
@@ -215,6 +229,14 @@ module MotionData
         request.predicate = @predicate
         request.sortDescriptors = @sortDescriptors unless @sortDescriptors.empty?
         request
+      end
+
+      def method_missing(method, *args, &block)
+        if scope = @target.scopes[method]
+          where(scope)
+        else
+          super
+        end
       end
     end
   end
