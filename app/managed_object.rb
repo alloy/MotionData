@@ -31,7 +31,7 @@ module MotionData
     end
   end
 
-  class ManagedObject < NSManagedObject
+  class ManagedObject < MotionDataManagedObjectBase
     include CoreTypes
 
     extend Predicate::Builder::Mixin
@@ -67,12 +67,7 @@ module MotionData
       def hasMany(name, options = {})
         #puts "#{self.name} has many `#{name}' (#{options.inspect})"
         entityDescription.hasMany(name, options)
-        klass = self
-        defineInstanceMethod(name) do |_self|
-          # TODO will/did access
-          set = _self.primitiveValueForKey(name.to_s)
-          Scope::Relationship.alloc.initWithTarget(set, relationshipName:name, owner:_self, ownerClass:klass)
-        end
+        defineRelationshipMethod(name)
       end
 
       def property(name, type, options = {})
@@ -98,12 +93,27 @@ module MotionData
       # method named after the scope.
       def scope(name, scope)
         scopes[name] = scope
-        defineClassMethod(name) { |_self| scope }
+        defineNamedScopeMethod(name)
+        scope
+      end
+
+      # Called from method that's dynamically added from
+      # +[MotionDataManagedObjectBase defineNamedScopeMethod:]
+      def scopeByName(name)
+        scopes[name]
       end
     end
 
-    def relationship(name)
-      Scope::Relationship.alloc.initWithTarget(send(name), relationshipName:name, owner:self, ownerClass:self.class.entityDescription.klass)
+    # Called from method that's dynamically added from
+    # +[MotionDataManagedObjectBase defineRelationshipMethod:]
+    def relationshipByName(name)
+      willAccessValueForKey(name)
+      scope = Scope::Relationship.alloc.initWithTarget(primitiveValueForKey(name),
+                                      relationshipName:name,
+                                                 owner:self,
+                                            ownerClass:self.class)
+      didAccessValueForKey(name)
+      scope
     end
 
     def writeAttribute(key, value)
