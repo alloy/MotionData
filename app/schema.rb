@@ -60,6 +60,7 @@ module MotionData
       ad = new
       ad.attributeReflection = reflection
       ad.name                = reflection[:name]
+      ad.defaultValue        = reflection[:options][:default]
       ad.optional            = !reflection[:options][:required]
 
       type = reflection[:type]

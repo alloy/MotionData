@@ -27,11 +27,16 @@ module MotionData
       Author.new.class.entityDescription.managedObjectClassName.should == 'Author'
     end
 
-    describe "property types" do
+    describe "property definitions" do
       it "includes String support" do
         author = Author.new
         author.name = "Edgar Allan Poe"
         author.name.should == "Edgar Allan Poe"
+      end
+
+      it "by default uses the default value" do
+        Article.new.published.should == false
+        Article.new(:published => true).published.should == true
       end
     end
 
@@ -66,7 +71,7 @@ module MotionData
         Author.edgars.predicate.predicateFormat.should == 'name == "edgar"'
       end
 
-      it "extends the normal Core Data realtionship set to act like a Scope::Relationship" do
+      it "extends the normal Core Data relationship set to act like a Scope::Relationship" do
         author = Author.new
         author.articles.should.is_a? Scope::Relationship::SetExt
         author.articles.__scope__.owner.should == author
@@ -74,7 +79,9 @@ module MotionData
 
         article1 = author.articles.new(:title => 'article1')
         article2 = author.articles.new(:title => 'article2')
-        author.articles.withTitle.to_a.should == [article2, article1]
+        author.articles.published.withTitle.to_a.should == []
+        article1.published = true; article2.published = true
+        author.articles.published.withTitle.to_a.should == [article2, article1]
       end
     end
   end
