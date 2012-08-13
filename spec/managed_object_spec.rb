@@ -34,9 +34,18 @@ module MotionData
         author.name.should == "Edgar Allan Poe"
       end
 
+      it "generates a predicate method to access a boolean property which returns false/false instead of 0/1" do
+        article = Article.new
+        article.published?.should == false
+        article.published = true
+
+        article = Article.all.to_a.first
+        article.published?.should == true
+      end
+
       it "by default uses the default value" do
-        Article.new.published.should == false
-        Article.new(:published => true).published.should == true
+        Article.new.should.not.be.published
+        Article.new(:published => true).should.be.published
       end
     end
 

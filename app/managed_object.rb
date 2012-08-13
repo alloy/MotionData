@@ -84,6 +84,7 @@ module MotionData
 
       def property(name, type, options = {})
         entityDescription.property(name, type, options)
+        definePropertyPredicateAccessor(name) if type == CoreTypes::Boolean
       end
 
       # Finders
@@ -133,6 +134,21 @@ module MotionData
       willChangeValueForKey(key)
       setPrimitiveValue(value, forKey:key)
       didChangeValueForKey(key)
+    end
+
+    # Called from method that's dynamically added from
+    # +[MotionDataManagedObjectBase definePropertyPredicateAccessor:]
+    def rubyBooleanValueForKey(name)
+      case send(name)
+      when 0
+        false
+      when 1
+        true
+      when nil
+        nil
+      else
+        raise "Unsupported value for key `#{name}'"
+      end
     end
 
     def inspect

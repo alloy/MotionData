@@ -8,4 +8,7 @@
 - (id)relationshipByName:(NSString *)name;
 + (void)defineRelationshipMethod:(NSString *)name;
 
+- (id)rubyBooleanValueForKey:(NSString *)name;
++ (void)definePropertyPredicateAccessor:(NSString *)name;
+
 @end
