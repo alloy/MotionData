@@ -104,6 +104,7 @@ module MotionData
       # Adds a named scope to the class and makes it available as a class
       # method named after the scope.
       def scope(name, scope)
+        name = name.to_sym
         scopes[name] = scope
         defineNamedScopeMethod(name)
         scope
@@ -112,7 +113,7 @@ module MotionData
       # Called from method that's dynamically added from
       # +[MotionDataManagedObjectBase defineNamedScopeMethod:]
       def scopeByName(name)
-        scopes[name]
+        scopes[name.to_sym]
       end
     end
 
@@ -132,6 +133,10 @@ module MotionData
       willChangeValueForKey(key)
       setPrimitiveValue(value, forKey:key)
       didChangeValueForKey(key)
+    end
+
+    def inspect
+      description
     end
   end
 

@@ -140,46 +140,25 @@ module MotionData
   class Scope
     class Relationship < Scope::Set
       # A Core Data relationship set is extended with this module to provide
-      # scoping.
-      #
-      # TODO declare these delegating methods in a dynamic way which ensures we
-      #      always forward all the methods from the Scope classes.
+      # scoping by forwarding messages to a Scope::Relationship instance which
+      # wraps the set.
       module SetExt
         attr_accessor :__scope__
 
-        def new(properties = nil)
-          @__scope__.new(properties)
-        end
-
-        def where(conditions, *formatArguments)
-          @__scope__.where(conditions, *formatArguments)
-        end
-
-        def sortBy(keyPathOrSortDescriptor)
-          @__scope__.sortBy(keyPathOrSortDescriptor)
-        end
-
-        def sortBy(keyPath, ascending:ascending)
-          @__scope__.sortBy(keyPath, ascending:ascending)
-        end
-
-        def each(&block)
-          @__scope__.each(&block)
-        end
-
-        def array
-          @__scope__.array
-        end
-
-        # TODO RM bug? aliased methods in subclasses don't call overriden version of aliased method.
-        #alias_method :to_a, :array
-
-        def to_a
-          @__scope__.array
-        end
-
         def set
           self
+        end
+
+        def respond_to?(method)
+          @__scope__.respond_to?(method) || super
+        end
+
+        def method_missing(method, *args, &block)
+          if respond_to?(method)
+            @__scope__.send(method, *args, &block)
+          else
+            super
+          end
         end
       end
 
@@ -228,8 +207,12 @@ module MotionData
         request
       end
 
+      def respond_to?(method)
+        !targetClass.scopeByName(method).nil? || super
+      end
+
       def method_missing(method, *args, &block)
-        if scope = targetClass.scopes[method]
+        if scope = targetClass.scopeByName(method)
           where(scope)
         else
           super
@@ -247,7 +230,7 @@ module MotionData
       end
 
       def targetClass
-        targetEntityDescription.klass
+        targetEntityDescription.modelClass
       end
 
       def inverseRelationshipName

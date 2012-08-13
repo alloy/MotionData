@@ -73,8 +73,8 @@ module MotionData
         author.articles.to_a.should == []
 
         article1 = author.articles.new(:title => 'article1')
-        #article2 = author.articles.new(:title => 'article2')
-        #author.articles.withTitles.to_a.should == [article1, article2]
+        article2 = author.articles.new(:title => 'article2')
+        author.articles.withTitle.to_a.should == [article2, article1]
       end
     end
   end

@@ -21,8 +21,8 @@ module MotionData
       relationshipDescriptionWithOptions({ :name => name, :maxCount => -1 }.merge(options))
     end
 
-    def klass
-      @klass ||= Object.const_get(name)
+    def modelClass
+      @modelClass ||= Object.const_get(name)
     end
 
     private
