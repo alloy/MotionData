@@ -33,9 +33,41 @@ module MotionData
         MotionData::Schema.current.registerEntity(klass.entityDescription)
       end
 
+      # Core Data dynamically creates subclasses of model classes in order to
+      # add the property accessors. These subclasses are named after the user’s
+      # class, but contain underscores.
+      #
+      # E.g. if the user’s model would be called `Author`, the dynamic subclass
+      # would be called `Author_Author_`.
+      def dynamicSubclass?
+        @dynamicSubclass = name.include?('_') if @dynamicSubclass.nil?
+        @dynamicSubclass
+      end
+
+      # Returns the model class as defined by the user, even if called on a
+      # class dynamically defined by Core Data.
+      def modelClass
+        @modelClass ||= begin
+          if dynamicSubclass?
+            # TODO this will probably break if the user namespaces the model class
+            Object.const_get(name.split('_').first)
+          else
+            self
+          end
+        end
+      end
+
+      # Returns the entity description from the model class as defined by the
+      # user, even if called on a class dynamically defined by Core Data.
       def entityDescription
-        @entityDescription ||= EntityDescription.new.tap do |ed|
-          ed.name = ed.managedObjectClassName = name
+        @entityDescription ||= begin
+          if dynamicSubclass?
+            modelClass.entityDescription
+          else
+            EntityDescription.new.tap do |ed|
+              ed.name = ed.managedObjectClassName = name
+            end
+          end
         end
       end
 
@@ -88,12 +120,11 @@ module MotionData
     # +[MotionDataManagedObjectBase defineRelationshipMethod:]
     def relationshipByName(name)
       willAccessValueForKey(name)
-      scope = Scope::Relationship.alloc.initWithTarget(primitiveValueForKey(name),
-                                      relationshipName:name,
-                                                 owner:self,
-                                            ownerClass:self.class)
+      set = Scope::Relationship.extendRelationshipSetWithScope(primitiveValueForKey(name),
+                                              relationshipName:name,
+                                                         owner:self)
       didAccessValueForKey(name)
-      scope
+      set
     end
 
     def writeAttribute(key, value)

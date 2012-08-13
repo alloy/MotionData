@@ -139,11 +139,63 @@ module MotionData
 
   class Scope
     class Relationship < Scope::Set
-      attr_accessor :relationshipName, :owner, :ownerClass
+      # A Core Data relationship set is extended with this module to provide
+      # scoping.
+      #
+      # TODO declare these delegating methods in a dynamic way which ensures we
+      #      always forward all the methods from the Scope classes.
+      module SetExt
+        attr_accessor :__scope__
 
-      def initWithTarget(target, relationshipName:relationshipName, owner:owner, ownerClass:ownerClass)
+        def new(properties = nil)
+          @__scope__.new(properties)
+        end
+
+        def where(conditions, *formatArguments)
+          @__scope__.where(conditions, *formatArguments)
+        end
+
+        def sortBy(keyPathOrSortDescriptor)
+          @__scope__.sortBy(keyPathOrSortDescriptor)
+        end
+
+        def sortBy(keyPath, ascending:ascending)
+          @__scope__.sortBy(keyPath, ascending:ascending)
+        end
+
+        def each(&block)
+          @__scope__.each(&block)
+        end
+
+        def array
+          @__scope__.array
+        end
+
+        # TODO RM bug? aliased methods in subclasses don't call overriden version of aliased method.
+        #alias_method :to_a, :array
+
+        def to_a
+          @__scope__.array
+        end
+
+        def set
+          self
+        end
+      end
+
+      def self.extendRelationshipSetWithScope(set, relationshipName:relationshipName, owner:owner)
+        set.extend SetExt
+        set.__scope__ = Relationship.alloc.initWithTarget(set,
+                                         relationshipName:relationshipName,
+                                                    owner:owner)
+        set
+      end
+
+      attr_accessor :relationshipName, :owner
+
+      def initWithTarget(target, relationshipName:relationshipName, owner:owner)
         if initWithTarget(target)
-          @relationshipName, @owner, @ownerClass = relationshipName, owner, ownerClass
+          @relationshipName, @owner = relationshipName, owner
         end
         self
       end
@@ -187,7 +239,7 @@ module MotionData
       private
 
       def relationshipDescription
-        @ownerClass.entityDescription.relationshipsByName[@relationshipName]
+        @owner.class.entityDescription.relationshipsByName[@relationshipName]
       end
 
       def targetEntityDescription
@@ -206,7 +258,6 @@ module MotionData
         scope = super
         scope.relationshipName = @relationshipName
         scope.owner = @owner
-        scope.ownerClass = @ownerClass
         scope
       end
     end

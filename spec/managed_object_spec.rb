@@ -10,6 +10,23 @@ module MotionData
       #MagicalRecord.cleanUp
     end
 
+    it "returns wether or not it's an actual model class defined by the user or a dynamic subclass defined by Core Data" do
+      Author.should.not.be.dynamicSubclass
+      Author.new.class.should.be.dynamicSubclass
+    end
+
+    it "always returns the model class defined by the user, not the dynamic subclass defined by Core Data" do
+      Author.modelClass.should == Author
+      Author.new.class.modelClass.should == Author
+    end
+
+    it "always returns the entity description of the model class defined by the user, not from the dynamic subclass defined by Core Data" do
+      Author.entityDescription.name.should == 'Author'
+      Author.entityDescription.managedObjectClassName.should == 'Author'
+      Author.new.class.entityDescription.name.should == 'Author'
+      Author.new.class.entityDescription.managedObjectClassName.should == 'Author'
+    end
+
     describe "property types" do
       it "includes String support" do
         author = Author.new
@@ -49,14 +66,13 @@ module MotionData
         Author.edgars.predicate.predicateFormat.should == 'name == "edgar"'
       end
 
-      it "returns a Scope::Relationship instead of the normal Core Data set" do
+      it "extends the normal Core Data realtionship set to act like a Scope::Relationship" do
         author = Author.new
-        author.articles.should.be.instance_of Scope::Relationship
-        author.articles.owner.should == author
-        author.articles.ownerClass.should == Author
+        author.articles.should.is_a? Scope::Relationship::SetExt
+        author.articles.__scope__.owner.should == author
         author.articles.to_a.should == []
 
-        #article1 = author.articles.new(:title => 'article1')
+        article1 = author.articles.new(:title => 'article1')
         #article2 = author.articles.new(:title => 'article2')
         #author.articles.withTitles.to_a.should == [article1, article2]
       end

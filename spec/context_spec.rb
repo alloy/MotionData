@@ -125,7 +125,7 @@ module MotionData
           Author.new(:name => "Edgar Allan Poe")
           sleep 0.1
         end
-        Author.all.size.should == 0
+        Author.all.to_a.size.should == 0
         wait 0.3 do
           Author.all.map(&:name).should == ["Edgar Allan Poe"]
         end

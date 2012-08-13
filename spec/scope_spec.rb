@@ -222,8 +222,7 @@ module MotionData
 
       @articles = Scope::Relationship.alloc.initWithTarget(@author.primitiveValueForKey('articles'),
                                           relationshipName: :articles,
-                                                     owner:@author,
-                                                ownerClass:Author)
+                                                     owner:@author)
     end
 
     it "wraps a Core Data relationship set" do
