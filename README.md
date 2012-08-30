@@ -2,8 +2,8 @@
 
 This uses a DSL which is inspired by [DataMapper](http://datamapper.org), but
 also [ActiveRecord](http://api.rubyonrails.org/classes/ActiveRecord/Base.html).
-In addition, it uses [MagicalRecord](https://github.com/magicalpanda/MagicalRecord)
-for many common tasks.
+In addition, many of its Core Date related design principles are based on
+[MagicalRecord](https://github.com/magicalpanda/MagicalRecord).
 
 ### Schema
 
