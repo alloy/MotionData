@@ -10,10 +10,13 @@ Motion::Project::App.setup do |app|
     schema.rb
     store_coordinator.rb
     context.rb
+    predicate.rb
     managed_object.rb
+    scope.rb
   }.map { |f| "../../app/#{f}" } + Dir.glob('app/**/*.rb')
 
   app.frameworks += %w{ CoreData }
+  app.vendor_project('../../ext', :static)
 end
 
 desc "Run app with Core Data SQLDebug enabled"
