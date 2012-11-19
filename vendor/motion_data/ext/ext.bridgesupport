@@ -1,0 +1,29 @@
+<?xml version='1.0'?>
+<signatures version='1.0'>
+<class name='MotionDataManagedObjectBase'>
+<method selector='defineNamedScopeMethod:' class_method='true'>
+<arg index='0' name='name' type='@' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='definePropertyPredicateAccessor:' class_method='true'>
+<arg index='0' name='name' type='@' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='defineRelationshipMethod:' class_method='true'>
+<arg index='0' name='name' type='@' declared_type='NSString*'/>
+<retval type='v' declared_type='void'/>
+</method>
+<method selector='relationshipByName:'>
+<arg index='0' name='name' type='@' declared_type='NSString*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='rubyBooleanValueForKey:'>
+<arg index='0' name='name' type='@' declared_type='NSString*'/>
+<retval type='@' declared_type='id'/>
+</method>
+<method selector='scopeByName:' class_method='true'>
+<arg index='0' name='name' type='@' declared_type='NSString*'/>
+<retval type='@' declared_type='id'/>
+</method>
+</class>
+</signatures>
