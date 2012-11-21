@@ -5,19 +5,19 @@ Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'MotionData'
   app.files = %w{
-    lib/motion-data/schema.rb
-    lib/motion-data/store_coordinator.rb
-    lib/motion-data/context.rb
-    lib/motion-data/predicate.rb
-    lib/motion-data/managed_object.rb
-    lib/motion-data/scope.rb
+    lib/motion_data/schema.rb
+    lib/motion_data/store_coordinator.rb
+    lib/motion_data/context.rb
+    lib/motion_data/predicate.rb
+    lib/motion_data/managed_object.rb
+    lib/motion_data/scope.rb
 
     app/test_models.rb
     app/app_delegate.rb
   }
   app.frameworks += %w{ CoreData }
 
-  app.vendor_project('vendor/motion-data/ext', :static)
+  app.vendor_project('vendor/motion_data/ext', :static)
 end
 
 task 'spec' do
