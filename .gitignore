@@ -7,3 +7,4 @@ resources/*.nib
 resources/*.momd
 resources/*.storyboardc
 examples/**/*.nib
+tags

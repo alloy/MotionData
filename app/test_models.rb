@@ -8,6 +8,7 @@ class Author
   hasMany :articles, :destinationEntity => Article.entityDescription, :inverse => :author
 
   property :name, String, :required => true
+  property :fee, Float
 end
 
 class Article

@@ -34,6 +34,12 @@ module MotionData
         author.name.should == "Edgar Allan Poe"
       end
 
+      it "includes Float support" do
+        author = Author.new
+        author.fee = 200.00
+        author.fee.should == 200.00
+      end
+
       it "generates a predicate method to access a boolean property which returns false/false instead of 0/1" do
         article = Article.new
         article.published?.should == false
