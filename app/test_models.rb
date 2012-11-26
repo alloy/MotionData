@@ -8,6 +8,7 @@ class Author
   hasMany :articles, :destinationEntity => Article.entityDescription, :inverse => :author
 
   property :name, String, :required => true
+  property :fee, Float
 end
 
 class Article
@@ -16,6 +17,7 @@ class Article
   property :title,     String,  :required => true
   property :body,      String,  :required => true
   property :published, Boolean, :default  => false
+  property :publishedAt, Time, :default  => false
 
   scope :published, where(:published => true)
   scope :withTitle, where( value(:title) != nil ).sortBy(:title, ascending:false)
