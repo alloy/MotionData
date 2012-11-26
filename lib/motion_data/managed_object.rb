@@ -12,6 +12,9 @@ module MotionData
 
     class Float
     end
+
+    class Time
+    end
   end
 
   class ManagedObject < MotionDataManagedObjectBase

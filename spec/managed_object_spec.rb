@@ -38,7 +38,16 @@ module MotionData
         author = Author.new
         author.fee = 200.00
         author.fee.should == 200.00
+        author.fee.class.should == Float
       end
+
+      it "includes Time support" do
+        article = Article.new
+        article.publishedAt = time = Time.now
+        article.publishedAt.should == time
+        article.publishedAt.class.should == Time
+      end
+
 
       it "generates a predicate method to access a boolean property which returns false/false instead of 0/1" do
         article = Article.new
