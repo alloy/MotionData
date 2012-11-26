@@ -9,6 +9,12 @@ module MotionData
 
     class Transformable
     end
+
+    class Float
+    end
+
+    class Time
+    end
   end
 
   class ManagedObject < MotionDataManagedObjectBase
