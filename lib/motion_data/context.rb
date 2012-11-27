@@ -100,5 +100,19 @@ module MotionData
     def objectsInContext(*objectsFromOtherContext)
       objectsFromOtherContext.map { |object| objectWithID(object.objectID) }
     end
+
+    def saveChanges
+      error_ptr = Pointer.new(:object)
+      unless save(error_ptr)
+        error = error_ptr[0]
+        puts "Error when saving data: #{error.localizedDescription}"
+        if !error.userInfo['NSDetailedErrors'].nil?
+          error.userInfo['NSDetailedErrors'].each do |key, value|
+            puts "#{key}: #{value}"
+          end
+        end
+        raise "Error when saving data: #{error.localizedDescription}"
+      end
+    end
   end
 end

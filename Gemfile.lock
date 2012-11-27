@@ -1,7 +1,7 @@
 PATH
   remote: ./
   specs:
-    motion_data (0.0.3)
+    motion_data (0.0.6)
 
 GEM
   remote: http://rubygems.org/
