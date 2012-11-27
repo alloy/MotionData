@@ -146,6 +146,16 @@ module MotionData
         authors_in_other_context.map(&:name).should == ["Edgar Allan Poe", "Stephenie Meyer"]
       end
     end
-  end
 
+    describe ".saveChanges" do
+      it "saves uncommitted changes" do
+        context = Context.main
+        context.hasChanges.should == false
+        Author.newInContext(context, :name => "Edgar Allan Poe")
+        context.hasChanges.should == true
+        context.saveChanges
+        context.hasChanges.should == false
+      end
+    end
+  end
 end
