@@ -40,6 +40,18 @@ module MotionData
         @main ||= new(root, NSMainQueueConcurrencyType)
       end
 
+      # debugging information on the current thread and context
+      def reportContext( message )
+        threading = NSThread.mainThread? ? "on MAIN thread" : "on background thread"
+        if current == main
+          NSLog "MAIN context #{threading} :#{message}"
+        elsif current == root
+          NSLog "ROOT context #{threading} :#{message}"
+        else
+          NSLog "#{current} context #{threading} :#{message}"
+        end
+      end
+
       # Returns a new private queue context that is a child of the main context.
       #
       # These are used to perform work in the background and then push that to
@@ -86,13 +98,22 @@ module MotionData
       result
     end
 
-    # TODO return wether or the save was a success
+    # TODO return whether or not the save was a success
     def transaction(options = {}, &block)
       c = context
       c.perform(options, &block)
       c.perform(options) do
-        unless c.save(nil)
-          # TODO handleError(error)
+
+        error_ptr = Pointer.new(:object)
+        unless c.save(error_ptr) 
+          error = error_ptr[0]
+          puts "Error when saving data: #{error.localizedDescription}"
+          if !error.userInfo['NSDetailedErrors'].nil?
+            error.userInfo['NSDetailedErrors'].each do |key, value|
+              puts "#{key}: #{value}"
+            end
+          end 
+          raise "Error when saving data: #{error.localizedDescription}"
         end
       end
     end
