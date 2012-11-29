@@ -48,6 +48,12 @@ module MotionData
         article.publishedAt.class.should == Time
       end
 
+      it "includes Integer32 support" do
+        article = Article.new
+        article.length = 2147483647
+        article.length.should == 2147483647
+      end
+
 
       it "generates a predicate method to access a boolean property which returns false/false instead of 0/1" do
         article = Article.new
