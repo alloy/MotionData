@@ -7,6 +7,9 @@ module MotionData
     class Integer16
     end
 
+    class Integer32
+    end
+
     class Transformable
     end
 

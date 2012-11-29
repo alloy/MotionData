@@ -72,6 +72,8 @@ module MotionData
                            NSTransformableAttributeType
                          elsif type == CoreTypes::Integer16
                            NSInteger16AttributeType
+                         elsif type == CoreTypes::Integer32
+                           NSInteger32AttributeType
                          elsif type == CoreTypes::Float
                            NSFloatAttributeType
                          elsif type == CoreTypes::Time
