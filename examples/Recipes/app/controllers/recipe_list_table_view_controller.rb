@@ -74,12 +74,8 @@ class RecipeListTableViewController < UITableViewController
     when NSFetchedResultsChangeDelete
       then tableView.deleteRowsAtIndexPaths(NSArray.arrayWithObject(indexPath),
                                             withRowAnimation:UITableViewRowAnimationFade)
-      #TODO case for NSFetchedResultsChangeUpdate is complaining that self does not have configureCell:atIndexPath method.
-      #cannot figure out how to call it appropriately. leaving commented it out for now.
-      #http://developer.apple.com/library/ios/#documentation/CoreData/Reference/NSFetchedResultsControllerDelegate_Protocol/Reference/Reference.html#//apple_ref/occ/intfm/NSFetchedResultsControllerDelegate/controllerWillChangeContent:
-      #when NSFetchedResultsChangeUpdate
-      # then self.configureCell(tableView.cellForRowAtIndexPath(indexPath),
-      #                        atIndexPath:indexPath)
+    when NSFetchedResultsChangeUpdate
+      then tableView(tableView, cellForRowAtIndexPath:indexPath)
     when NSFetchedResultsChangeMove
       then
       tableView.deleteRowsAtIndexPaths(NSArray.arrayWithObject(indexPath),
