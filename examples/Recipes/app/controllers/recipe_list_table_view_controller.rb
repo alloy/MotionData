@@ -52,6 +52,47 @@ class RecipeListTableViewController < UITableViewController
     end
   end
 
+  def controllerWillChangeContent(controller)
+    self.tableView.beginUpdates
+  end
+
+  def controller(controller, didChangeSection: sectionInfo, atIndex: sectionIndex, forchangeType: type)
+    case type
+    when NSFetchedResultsChangeInsert
+      then self.tableView.insertSections(NSIndexSet.indexSetWithIndex(sectionIndex), withRowAnimation:UITableViewRowAnimationFade)
+    when NSFetchedResultsChangeDelete
+      then self.tableView.deleteSections(NSIndexSet.indexSetWithIndex(sectionIndex), withRowAnimation:UITableViewRowAnimationFade)
+    end
+  end
+
+  def controller(controller, didChangeObject:anObject, atIndexPath:indexPath, forChangeType:type, newIndexPath:newIndexPath)
+    tableView = self.tableView
+    case type
+    when NSFetchedResultsChangeInsert
+      then tableView.insertRowsAtIndexPaths(NSArray.arrayWithObject(newIndexPath),
+                                            withRowAnimation:UITableViewRowAnimationFade)
+    when NSFetchedResultsChangeDelete
+      then tableView.deleteRowsAtIndexPaths(NSArray.arrayWithObject(indexPath),
+                                            withRowAnimation:UITableViewRowAnimationFade)
+      #TODO case for NSFetchedResultsChangeUpdate is complaining that self does not have configureCell:atIndexPath method.
+      #cannot figure out how to call it appropriately. leaving commented it out for now.
+      #http://developer.apple.com/library/ios/#documentation/CoreData/Reference/NSFetchedResultsControllerDelegate_Protocol/Reference/Reference.html#//apple_ref/occ/intfm/NSFetchedResultsControllerDelegate/controllerWillChangeContent:
+      #when NSFetchedResultsChangeUpdate
+      # then self.configureCell(tableView.cellForRowAtIndexPath(indexPath),
+      #                        atIndexPath:indexPath)
+    when NSFetchedResultsChangeMove
+      then
+      tableView.deleteRowsAtIndexPaths(NSArray.arrayWithObject(indexPath),
+                                       withRowAnimation:UITableViewRowAnimationFade)
+      tableView.insertRowsAtIndexPaths(NSArray.arrayWithObject(newIndexPath),
+                                       withRowAnimation:UITableViewRowAnimationFade)
+    end
+  end
+
+  def controllerDidChangeContent(controller)
+    self.tableView.endUpdates
+  end
+
   def numberOfSectionsInTableView(tableView)
     count = fetchedResultsController.sections.count
     count == 0 ? 1 : count
