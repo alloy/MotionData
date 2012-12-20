@@ -52,6 +52,43 @@ class RecipeListTableViewController < UITableViewController
     end
   end
 
+  def controllerWillChangeContent(controller)
+    self.tableView.beginUpdates
+  end
+
+  def controller(controller, didChangeSection: sectionInfo, atIndex: sectionIndex, forchangeType: type)
+    case type
+    when NSFetchedResultsChangeInsert
+      then self.tableView.insertSections(NSIndexSet.indexSetWithIndex(sectionIndex), withRowAnimation:UITableViewRowAnimationFade)
+    when NSFetchedResultsChangeDelete
+      then self.tableView.deleteSections(NSIndexSet.indexSetWithIndex(sectionIndex), withRowAnimation:UITableViewRowAnimationFade)
+    end
+  end
+
+  def controller(controller, didChangeObject:anObject, atIndexPath:indexPath, forChangeType:type, newIndexPath:newIndexPath)
+    tableView = self.tableView
+    case type
+    when NSFetchedResultsChangeInsert
+      then tableView.insertRowsAtIndexPaths(NSArray.arrayWithObject(newIndexPath),
+                                            withRowAnimation:UITableViewRowAnimationFade)
+    when NSFetchedResultsChangeDelete
+      then tableView.deleteRowsAtIndexPaths(NSArray.arrayWithObject(indexPath),
+                                            withRowAnimation:UITableViewRowAnimationFade)
+    when NSFetchedResultsChangeUpdate
+      then tableView(tableView, cellForRowAtIndexPath:indexPath)
+    when NSFetchedResultsChangeMove
+      then
+      tableView.deleteRowsAtIndexPaths(NSArray.arrayWithObject(indexPath),
+                                       withRowAnimation:UITableViewRowAnimationFade)
+      tableView.insertRowsAtIndexPaths(NSArray.arrayWithObject(newIndexPath),
+                                       withRowAnimation:UITableViewRowAnimationFade)
+    end
+  end
+
+  def controllerDidChangeContent(controller)
+    self.tableView.endUpdates
+  end
+
   def numberOfSectionsInTableView(tableView)
     count = fetchedResultsController.sections.count
     count == 0 ? 1 : count
