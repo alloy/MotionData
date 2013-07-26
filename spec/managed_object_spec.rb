@@ -54,6 +54,14 @@ module MotionData
         article.length.should == 2147483647
       end
 
+      it "includes Transformable support" do
+        author = Author.new
+        author.last_name = 'Dickens'
+        author.last_name.should == 'Dickens'
+        attribute_description = Author.new.class.entityDescription.attributesByName['last_name']
+        attribute_description.valueTransformerName.should == LastNameTransformer.name
+      end
+
 
       it "generates a predicate method to access a boolean property which returns false/false instead of 0/1" do
         article = Article.new

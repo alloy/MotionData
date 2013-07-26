@@ -63,6 +63,10 @@ module MotionData
       ad.defaultValue        = reflection[:options][:default]
       ad.optional            = !reflection[:options][:required]
 
+      if reflection[:options][:transformer]
+        ad.valueTransformerName = reflection[:options][:transformer].name
+      end
+
       type = reflection[:type]
       ad.attributeType = if type == String
                            NSStringAttributeType
