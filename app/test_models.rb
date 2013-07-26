@@ -4,11 +4,30 @@ end
 class Article < MotionData::ManagedObject
 end
 
+class LastNameTransformer < NSValueTransformer
+   def self.allowsReverseTransformation
+    true
+  end
+
+  def self.transformedValueClass
+    NSString.class
+  end
+
+  def transformedValue(value)
+     "prefix.#{value}".dataUsingEncoding NSUTF8StringEncoding
+  end
+
+  def reverseTransformedValue(value)
+    NSString.stringWithUTF8String(value.bytes).sub /prefix/, ''
+  end
+end
+
 class Author
   hasMany :articles, :destinationEntity => Article.entityDescription, :inverse => :author
 
   property :name, String, :required => true
   property :fee, Float
+  property :last_name, Transformable, :transformer => LastNameTransformer
 end
 
 class Article
