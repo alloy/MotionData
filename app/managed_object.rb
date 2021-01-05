@@ -3,30 +3,30 @@ module MotionData
   module CoreTypes
     class Boolean
     end
+
+    class Integer16
+    end
+
+    class Transformable
+    end
   end
 
-  class ManagedObject < NSManagedObject
+  class ManagedObject < MotionDataManagedObjectBase
     include CoreTypes
+
+    extend Predicate::Builder::Mixin
+    include Predicate::Builder::Mixin
 
     class << self
 
       def new(properties = nil)
-        context = Thread.current[:localContext] || NSManagedObjectContext.contextForCurrentThread
-        newInContext(context, properties)
+        newInContext(Context.current, properties)
       end
 
       def newInContext(context, properties = nil)
-        entity = createInContext(context)
+        entity = alloc.initWithEntity(entityDescription, insertIntoManagedObjectContext:context)
         properties.each { |k, v| entity.send("#{k}=", v) } if properties
         entity
-      end
-
-      def saveInBackground(&block)
-        MagicalRecord.saveInBackgroundWithBlock(lambda do |localContext|
-          Thread.current[:localContext] = localContext
-          block.call(localContext)
-          Thread.current[:localContext] = nil
-        end)
       end
 
       def inherited(klass)
@@ -35,21 +35,72 @@ module MotionData
 
       def entityDescription
         @entityDescription ||= EntityDescription.new.tap do |ed|
-          ed.name = ed.managedObjectClassName = self.name
+          ed.name = ed.managedObjectClassName = name
         end
       end
 
-      def belongsTo(name, options = {})
-        #puts "#{self.name} belongs to `#{name}' (#{options.inspect})"
+      def hasOne(name, options = {})
+        #puts "#{self.name} has one `#{name}' (#{options.inspect})"
+        entityDescription.hasOne(name, options)
       end
 
       def hasMany(name, options = {})
         #puts "#{self.name} has many `#{name}' (#{options.inspect})"
+        entityDescription.hasMany(name, options)
+        defineRelationshipMethod(name)
       end
 
       def property(name, type, options = {})
         entityDescription.property(name, type, options)
       end
+
+      # Finders
+
+      def all
+        Scope::Model.alloc.initWithTarget(self)
+      end
+
+      def where(conditions)
+        all.where(conditions)
+      end
+
+      # TODO copy to subclasses of abstract models
+      def scopes
+        @scopes ||= {}
+      end
+
+      # Adds a named scope to the class and makes it available as a class
+      # method named after the scope.
+      def scope(name, scope)
+        scopes[name] = scope
+        defineNamedScopeMethod(name)
+        scope
+      end
+
+      # Called from method that's dynamically added from
+      # +[MotionDataManagedObjectBase defineNamedScopeMethod:]
+      def scopeByName(name)
+        scopes[name]
+      end
+    end
+
+    # Called from method that's dynamically added from
+    # +[MotionDataManagedObjectBase defineRelationshipMethod:]
+    def relationshipByName(name)
+      willAccessValueForKey(name)
+      scope = Scope::Relationship.alloc.initWithTarget(primitiveValueForKey(name),
+                                      relationshipName:name,
+                                                 owner:self,
+                                            ownerClass:self.class)
+      didAccessValueForKey(name)
+      scope
+    end
+
+    def writeAttribute(key, value)
+      key = key.to_s
+      willChangeValueForKey(key)
+      setPrimitiveValue(value, forKey:key)
+      didChangeValueForKey(key)
     end
   end
 

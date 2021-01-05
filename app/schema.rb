@@ -1,15 +1,54 @@
 module MotionData
+  def self.setupCoreDataStackWithInMemoryStore
+    Schema.current.setupCoreDataStackWithInMemoryStore
+  end
 
-  class Context < NSManagedObjectContext
-    def self.default
-      self.MR_defaultContext
-    end
+  def self.setupCoreDataStackWithSQLiteStore(path)
+    Schema.current.setupCoreDataStackWithSQLiteStore(path)
   end
 
   class EntityDescription < NSEntityDescription
-    def property(name, type, options={})
+    def property(name, type, options = {})
       ad = AttributeDescription.withReflection(:name => name, :type => type, :options => options)
       self.properties = properties.arrayByAddingObject(ad)
+    end
+
+    def hasOne(name, options = {})
+      relationshipDescriptionWithOptions({ :name => name, :maxCount => 1 }.merge(options))
+    end
+
+    def hasMany(name, options = {})
+      relationshipDescriptionWithOptions({ :name => name, :maxCount => -1 }.merge(options))
+    end
+
+    def klass
+      @klass ||= Object.const_get(name)
+    end
+
+    private
+
+    def relationshipDescriptionWithOptions(options)
+      rd = NSRelationshipDescription.new
+      inverseName = options.delete(:inverse)
+
+      options.each do |key, value|
+        rd.send("#{key}=", value)
+      end
+
+      # There is a chicken-and-egg problem, which is that the inverse
+      # relationship doesn't exist yet, by the time this relationship is
+      # defined, if this is the first model that defines a part of this
+      # relationship.
+      if inverseName && inverse = rd.destinationEntity.relationshipsByName[inverseName]
+        rd.inverseRelationship = inverse
+        inverse.inverseRelationship = rd
+        #puts rd.debugDescription
+        #puts
+        #puts inverse.debugDescription
+        #puts
+      end
+
+      self.properties = properties.arrayByAddingObject(rd)
     end
   end
 
@@ -24,8 +63,14 @@ module MotionData
       ad.optional            = !reflection[:options][:required]
 
       type = reflection[:type]
-      ad.attributeType = if type == String then NSStringAttributeType
-                         elsif type == CoreTypes::Boolean then NSBooleanAttributeType
+      ad.attributeType = if type == String
+                           NSStringAttributeType
+                         elsif type == CoreTypes::Boolean
+                           NSBooleanAttributeType
+                         elsif type == CoreTypes::Transformable
+                           NSTransformableAttributeType
+                         elsif type == CoreTypes::Integer16
+                           NSInteger16AttributeType
                          else
                            # Transient types?
                            NSUndefinedAttributeType
@@ -33,7 +78,6 @@ module MotionData
       ad
     end
   end
-
 
   class Schema < NSManagedObjectModel
     def self.current
@@ -50,10 +94,13 @@ module MotionData
     # Stack maintenance
 
     def setupCoreDataStackWithInMemoryStore
-      NSManagedObjectModel.MR_setDefaultManagedObjectModel(self)
-      coordinator = NSPersistentStoreCoordinator.MR_coordinatorWithInMemoryStore
-      NSPersistentStoreCoordinator.MR_setDefaultStoreCoordinator(coordinator)
-      Context.MR_initializeDefaultContextWithCoordinator(coordinator)
+      Context.root = Context.main = nil
+      StoreCoordinator.default = StoreCoordinator.inMemory(self)
+    end
+
+    def setupCoreDataStackWithSQLiteStore(path)
+      Context.root = Context.main = nil
+      StoreCoordinator.default = StoreCoordinator.onDiskStore(self, path)
     end
 
     # TODO handle errors!
@@ -108,12 +155,13 @@ end
 
     private
 
+    # TODO .select { |p| p.is_a?(AttributeDescription) } is needed because we don't serialize relationships yet
     def entityToRuby(entity)
 %{
   s.entity do |e|
     e.name = '#{entity.name}'
     e.managedObjectClassName = '#{entity.managedObjectClassName}'
-#{entity.properties.map { |p| propertyToRuby(p) }.join("\n")}
+#{entity.properties.select { |p| p.is_a?(AttributeDescription) }.map { |p| propertyToRuby(p) }.join("\n")}
   end
 }
     end

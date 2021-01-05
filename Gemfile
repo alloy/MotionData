@@ -1,4 +1,3 @@
 source :rubygems
 
-gem 'motion-cocoapods'
-gem 'kicker'
+gem 'kicker', '3.0.0pre1'

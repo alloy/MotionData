@@ -49,7 +49,7 @@ module MotionData
 
       describe "#property" do
         after do
-          MagicalRecord.cleanUp
+          #MagicalRecord.cleanUp
         end
 
         it "creates attributes with the given name and type" do
@@ -62,7 +62,7 @@ module MotionData
           schema.setupCoreDataStackWithInMemoryStore
 
           object = EntityDescription.insertNewObjectForEntityForName('AnEntity',
-                                              inManagedObjectContext:NSManagedObjectContext.defaultContext)
+                                              inManagedObjectContext:Context.current)
           object.someProp = 'hey'
           object.someProp.should == 'hey'
         end
